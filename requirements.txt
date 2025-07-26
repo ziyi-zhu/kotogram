@@ -1,6 +1,0 @@
-janome
-pydantic
-ipython
-pdbpp
-loguru
-pytest

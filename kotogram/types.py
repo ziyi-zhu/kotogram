@@ -17,6 +17,7 @@ class PartOfSpeech(Enum):
     SUFFIX = "接尾"
     CONJUNCTION = "接続詞"
     INTERJECTION = "感動詞"
+    ADNOMINAL = "連体詞"
     UNKNOWN = "未知語"
 
 
@@ -30,6 +31,7 @@ class DetailType(Enum):
     NOUN_SURNAME = "姓"
     NOUN_ORGANIZATION = "組織"
     NOUN_NUMERAL = "数"
+    NOUN_COUNTER = "助数詞"
     NOUN_ADVERBIAL = "副詞可能"
     NOUN_SAHEN = "サ変接続"
     NOUN_ADJECTIVE_VERBAL = "形容動詞語幹"
@@ -41,6 +43,7 @@ class DetailType(Enum):
     NOUN_REGION = "地域"
     NOUN_COUNTRY = "国"
     NOUN_ADVERBIALIZATION = "副詞化"
+    NOUN_CONNECTION = "名詞接続"
 
     # Verb-related
     VERB_INDEPENDENT = "自立"
@@ -65,39 +68,46 @@ class DetailType(Enum):
     SYMBOL_ALPHABET = "アルファベット"
 
     # Others
+    COMPOUND = "連語"
+    QUOTATION = "引用"
     UNKNOWN = "*"
 
 
-class VerbForm(Enum):
-    """Verb conjugation forms"""
+class InflectionForm(Enum):
+    """Verb inflection forms"""
 
     BASIC = "基本形"
     STEM = "語幹"
-    CONJUGATED = "連用形"
-    CONJUGATED_TE = "連用タ接続"
-    CONJUGATED_GO = "連用ゴザイ"
+    INFLECTED = "連用形"
+    INFLECTED_TE = "連用タ接続"
+    INFLECTED_GO = "連用ゴザイ"
     IMPERATIVE = "命令ｉ"
     IMPERATIVE_E = "命令ｅ"
     IMPERATIVE_YO = "命令ｙｏ"
     IMPERATIVE_RO = "命令ｒｏ"
     CONDITIONAL = "仮定形"
     ATTRIBUTIVE = "連体形"
-    UNCONJUGATED = "未然形"
-    UNCONJUGATED_NEGATIVE = "未然ウ接続"
-    UNCONJUGATED_SPECIAL = "未然特殊"
+    UNINFLECTED = "未然形"
+    UNINFLECTED_NEGATIVE = "未然ウ接続"
+    UNINFLECTED_SPECIAL = "未然特殊"
+    NOUN_CONNECTION = "体言接続"
     UNKNOWN = "*"
 
 
-class VerbConjugation(Enum):
-    """Verb conjugation types"""
+class InflectionType(Enum):
+    """Inflection types (merged from previous inflection and auxiliary verb types)"""
 
+    # Verb inflection types
     GODAN = "五段・ラ行"
+    GODAN_AL = "五段・ラ行アル"
     GODAN_SPECIAL = "五段・ラ行特殊"
     GODAN_KA_CONTRACTED = "五段・カ行促音便"
     GODAN_KA_IBIN = "五段・カ行イ音便"
+    GODAN_WA_CONTRACTED = "五段・ワ行促音便"
     GODAN_MA = "五段・マ行"
     GODAN_GA = "五段・ガ行"
     GODAN_BA = "五段・バ行"
+    GODAN_SA = "五段・サ行"
     ICHIDAN = "一段"
     SAHEN = "サ変・スル"
     KA_GODAN = "カ変・クル"
@@ -106,14 +116,8 @@ class VerbConjugation(Enum):
     SA_GODAN_SPECIAL = "サ変・−ズル"
     ADJECTIVE_ISTEM = "形容詞・イ段"
     ADJECTIVE_AUO = "形容詞・アウオ段"
-    UNKNOWN = "*"
-
-
-class AuxiliaryVerbType(Enum):
-    """Auxiliary verb types"""
-
-    GODAN_SPECIAL = "五段・ラ行特殊"
     UNCHANGING = "不変化型"
+
     SPECIAL_TA = "特殊・タ"
     SPECIAL_DA = "特殊・ダ"
     SPECIAL_DESU = "特殊・デス"

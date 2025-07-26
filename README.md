@@ -13,17 +13,65 @@ A comprehensive Python package for Japanese morphological analysis with robust e
 
 ## Installation
 
+This project uses Poetry for dependency management. To get started:
+
 ```bash
-pip install -r requirements.txt
+# Run the Poetry setup script
+./setup_poetry.sh
+
+# Or manually install Poetry and dependencies
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install
+```
+
+## Development Setup
+
+This project uses pre-commit hooks to ensure code quality. To set up the development environment:
+
+```bash
+# Install Poetry and project dependencies
+poetry install
+
+# Install pre-commit hooks
+poetry run pre-commit install
+
+# Or run the complete setup script
+./setup_poetry.sh
+```
+
+### Pre-commit Hooks
+
+The following hooks are configured to run automatically on commit:
+
+- **Black**: Code formatting (line length: 88)
+- **isort**: Import sorting (compatible with Black)
+- **flake8**: Linting with Black-compatible settings
+- **mypy**: Type checking
+- **bandit**: Security linting
+- **pre-commit-hooks**: Basic file checks (trailing whitespace, YAML validation, etc.)
+
+### Running Hooks Manually
+
+```bash
+# Run all hooks on all files
+poetry run pre-commit run --all-files
+
+# Run hooks on staged files only
+poetry run pre-commit run
+
+# Run a specific hook
+poetry run pre-commit run black
+poetry run pre-commit run flake8
+poetry run pre-commit run mypy
 ```
 
 ## Quick Start
 
 ```python
-from kotogram import JanomeAnalyzer
+from kotogram import KotogramAnalyzer
 
 # Initialize analyzer
-analyzer = JanomeAnalyzer()
+analyzer = KotogramAnalyzer()
 
 # Analyze text
 text = "最新の企画書が出来あがったので、どうぞご覧ください。"
@@ -71,14 +119,14 @@ Format: `表層形（原形）【品詞】詳細1・詳細2・詳細3「読み�
 
 ### Core Classes
 
-#### `Token`
+#### `KotogramToken`
 Represents a single morphological analysis result.
 
 **Properties:**
 - `surface`: Surface form (表層形)
 - `part_of_speech`: Part of speech (品詞)
 - `pos_detail1/2/3`: Detailed classifications (品詞細分類)
-- `conjugation_type`: Verb conjugation type (活用型)
+- `conjugation_type`: Verb inflection type (活用型)
 - `conjugation_form`: Verb form (活用形)
 - `base_form`: Base form (原形)
 - `reading`: Reading (読み)
@@ -88,17 +136,12 @@ Represents a single morphological analysis result.
 - `is_noun`, `is_verb`, `is_particle`, `is_symbol`, `is_auxiliary_verb`: Type checking
 - `__str__()`: Beautiful string representation
 
-#### `JanomeAnalyzer`
+#### `KotogramAnalyzer`
 Main analyzer class using Janome for tokenization.
 
 **Methods:**
-- `analyze_text(text)`: Analyze Japanese text and return Token list
+- `analyze_text(text)`: Analyze Japanese text and return KotogramToken list
 - `print_tokens(tokens)`: Print tokens in formatted output
-
-#### `MorphologicalAnalyzer`
-Low-level parser for morphological analysis results.
-
-**Methods:**
 - `parse_line(line)`: Parse single line of analysis results
 - `parse_text(text)`: Parse multi-line analysis results
 
@@ -111,14 +154,11 @@ Low-level parser for morphological analysis results.
 #### `DetailType`
 Comprehensive enum covering all detail classifications for nouns, verbs, particles, and symbols.
 
-#### `VerbForm`
-Verb conjugation forms: `BASIC`, `CONJUGATED`, `IMPERATIVE`, `CONDITIONAL`, etc.
+#### `InflectionForm`
+Verb inflection forms: `BASIC`, `INFLECTED`, `IMPERATIVE`, `CONDITIONAL`, etc.
 
-#### `VerbConjugation`
-Verb conjugation types: `GODAN`, `ICHIDAN`, `SAHEN`, etc.
-
-#### `AuxiliaryVerbType`
-Auxiliary verb types: `SPECIAL_TA`, `SPECIAL_DA`, `SPECIAL_MASU`, etc.
+#### `InflectionType`
+Inflection types (merged from previous inflection and auxiliary verb types): `GODAN`, `ICHIDAN`, `SAHEN`, `AUX_SPECIAL_TA`, `AUX_SPECIAL_DA`, etc.
 
 ## Error Handling
 
@@ -134,7 +174,7 @@ The package includes robust error handling:
 Run the comprehensive test suite:
 
 ```bash
-python -m pytest tests/ -v
+poetry run pytest tests/ -v
 ```
 
 ### Test Coverage
@@ -173,24 +213,24 @@ from kotogram import JanomeAnalyzer
 def main():
     # Initialize analyzer
     analyzer = JanomeAnalyzer()
-    
+
     # Test text
     text = "最新の企画書が出来あがったので、どうぞご覧ください。"
-    
+
     # Analyze text
     tokens = analyzer.analyze_text(text)
-    
+
     # Print results
     print(f"=== Morphological Analysis Results ({len(tokens)} tokens) ===")
     analyzer.print_tokens(tokens)
-    
+
     # Statistics
     print("\n=== Statistics ===")
     pos_counts = {}
     for token in tokens:
         pos = token.part_of_speech.value
         pos_counts[pos] = pos_counts.get(pos, 0) + 1
-    
+
     for pos, count in sorted(pos_counts.items()):
         print(f"{pos}: {count} tokens")
 
@@ -208,4 +248,4 @@ if __name__ == "__main__":
 
 ## License
 
-This project is licensed under the MIT License. 
+This project is licensed under the MIT License.

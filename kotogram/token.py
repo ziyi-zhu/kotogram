@@ -1,19 +1,11 @@
 """Token class for Japanese morphological analysis"""
 
-from typing import Union
-
 from pydantic import BaseModel, Field
 
-from .types import (
-    AuxiliaryVerbType,
-    DetailType,
-    PartOfSpeech,
-    VerbConjugation,
-    VerbForm,
-)
+from .types import DetailType, InflectionForm, InflectionType, PartOfSpeech
 
 
-class Token(BaseModel):
+class KotogramToken(BaseModel):
     """Class to store Japanese morphological analysis results"""
 
     # Surface form (表層形)
@@ -31,13 +23,11 @@ class Token(BaseModel):
     # Detailed part of speech 3 (品詞細分類3)
     pos_detail3: DetailType = Field(..., description="Detailed part of speech 3")
 
-    # Conjugation type (活用型)
-    conjugation_type: Union[VerbConjugation, AuxiliaryVerbType] = Field(
-        ..., description="Conjugation type"
-    )
+    # Inflection type (活用型)
+    infl_type: InflectionType = Field(..., description="Inflection type")
 
-    # Conjugation form (活用形)
-    conjugation_form: VerbForm = Field(..., description="Conjugation form")
+    # Inflection form (活用形)
+    infl_form: InflectionForm = Field(..., description="Inflection form")
 
     # Base form (原形)
     base_form: str = Field(..., description="Base form")
@@ -46,7 +36,7 @@ class Token(BaseModel):
     reading: str = Field(..., description="Reading")
 
     # Pronunciation (発音)
-    pronunciation: str = Field(..., description="Pronunciation")
+    phonetic: str = Field(..., description="Pronunciation")
 
     @property
     def is_noun(self) -> bool:
@@ -86,15 +76,15 @@ class Token(BaseModel):
             details.append(self.pos_detail2.value)
         if self.pos_detail3.value != "*":
             details.append(self.pos_detail3.value)
-        if self.conjugation_type.value != "*":
-            details.append(self.conjugation_type.value)
-        if self.conjugation_form.value != "*":
-            details.append(self.conjugation_form.value)
+        if self.infl_type.value != "*":
+            details.append(self.infl_type.value)
+        if self.infl_form.value != "*":
+            details.append(self.infl_form.value)
 
         # Build the string
         result = f"{self.surface}{base_part}【{self.part_of_speech.value}】"
         if not self.is_symbol:
-            result += f"「{self.reading}・{self.pronunciation}」"
+            result += f"「{self.reading}・{self.phonetic}」"
         if details:
             result += "・".join(details)
 

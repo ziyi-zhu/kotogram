@@ -3,13 +3,12 @@
 import pytest
 
 from kotogram import (
-    AuxiliaryVerbType,
     DetailType,
-    JanomeAnalyzer,
+    InflectionForm,
+    InflectionType,
+    KotogramAnalyzer,
+    KotogramToken,
     PartOfSpeech,
-    Token,
-    VerbConjugation,
-    VerbForm,
 )
 
 
@@ -17,12 +16,12 @@ class TestCommonWords:
     """Test common Japanese words"""
 
     def setup_method(self):
-        self.analyzer = JanomeAnalyzer()
+        self.analyzer = KotogramAnalyzer()
 
     def test_nouns(self):
         """Test common nouns"""
         text = "猫 犬 本 車 家"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         assert len(tokens) == 5
         for token in tokens:
@@ -32,7 +31,7 @@ class TestCommonWords:
     def test_verbs(self):
         """Test common verbs"""
         text = "行く 来る 見る 食べる 飲む"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         assert len(tokens) == 5
         for token in tokens:
@@ -42,7 +41,7 @@ class TestCommonWords:
     def test_particles(self):
         """Test common particles"""
         text = "の が を に で"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         # Should have tokens
         assert len(tokens) > 0
@@ -58,7 +57,7 @@ class TestCommonWords:
     def test_adjectives(self):
         """Test common adjectives"""
         text = "大きい 小さい 美しい 新しい"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         # Should have tokens
         assert len(tokens) > 0
@@ -74,12 +73,12 @@ class TestSentences:
     """Test complete sentences"""
 
     def setup_method(self):
-        self.analyzer = JanomeAnalyzer()
+        self.analyzer = KotogramAnalyzer()
 
     def test_simple_sentence(self):
         """Test a simple sentence"""
         text = "私は学生です。"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         assert len(tokens) == 5
         assert tokens[0].surface == "私"
@@ -95,7 +94,7 @@ class TestSentences:
     def test_complex_sentence(self):
         """Test a more complex sentence"""
         text = "最新の企画書が出来あがったので、どうぞご覧ください。"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         assert len(tokens) == 14
 
@@ -114,7 +113,7 @@ class TestSentences:
     def test_question_sentence(self):
         """Test a question sentence"""
         text = "何を食べますか？"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         # Janome may produce different number of tokens, so check for expected tokens
         assert len(tokens) >= 4  # At least 4 tokens
@@ -134,12 +133,12 @@ class TestPhrases:
     """Test common phrases"""
 
     def setup_method(self):
-        self.analyzer = JanomeAnalyzer()
+        self.analyzer = KotogramAnalyzer()
 
     def test_greeting_phrases(self):
         """Test greeting phrases"""
         text = "おはようございます こんにちは こんばんは"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         # Should have tokens
         assert len(tokens) > 0
@@ -151,7 +150,7 @@ class TestPhrases:
     def test_verb_phrases(self):
         """Test verb phrases"""
         text = "行きたい 見てください 食べましょう"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         # Should have tokens
         assert len(tokens) > 0
@@ -165,12 +164,12 @@ class TestPartOfSpeech:
     """Test part of speech detection"""
 
     def setup_method(self):
-        self.analyzer = JanomeAnalyzer()
+        self.analyzer = KotogramAnalyzer()
 
     def test_noun_detection(self):
         """Test noun detection"""
         text = "東京 日本 会社 学校"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         for token in tokens:
             assert token.is_noun
@@ -181,7 +180,7 @@ class TestPartOfSpeech:
     def test_verb_detection(self):
         """Test verb detection"""
         text = "歩く 走る 泳ぐ 飛ぶ"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         for token in tokens:
             assert token.is_verb
@@ -192,7 +191,7 @@ class TestPartOfSpeech:
     def test_particle_detection(self):
         """Test particle detection"""
         text = "は が を に で から まで"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         # Should have tokens
         assert len(tokens) > 0
@@ -207,7 +206,7 @@ class TestPartOfSpeech:
     def test_symbol_detection(self):
         """Test symbol detection"""
         text = "。 、 ！ ？"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         for token in tokens:
             assert token.is_symbol
@@ -220,12 +219,12 @@ class TestTokenProperties:
     """Test token properties and methods"""
 
     def setup_method(self):
-        self.analyzer = JanomeAnalyzer()
+        self.analyzer = KotogramAnalyzer()
 
     def test_token_string_representation(self):
         """Test token string representation"""
         text = "猫"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         token = tokens[0]
         str_repr = str(token)
@@ -239,7 +238,7 @@ class TestTokenProperties:
     def test_token_with_base_form(self):
         """Test token with different base form"""
         text = "行く"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         token = tokens[0]
         str_repr = str(token)
@@ -253,7 +252,7 @@ class TestTokenProperties:
     def test_token_details(self):
         """Test token detail properties"""
         text = "美しい"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         token = tokens[0]
 
@@ -261,25 +260,25 @@ class TestTokenProperties:
         assert isinstance(token.pos_detail1, DetailType)
         assert isinstance(token.pos_detail2, DetailType)
         assert isinstance(token.pos_detail3, DetailType)
-        assert isinstance(token.conjugation_form, VerbForm)
+        assert isinstance(token.infl_form, InflectionForm)
 
 
 class TestErrorHandling:
     """Test error handling and warnings"""
 
     def setup_method(self):
-        self.analyzer = JanomeAnalyzer()
+        self.analyzer = KotogramAnalyzer()
 
     def test_unknown_part_of_speech(self):
         """Test handling of unknown part of speech from Janome"""
         # This might trigger an error if Janome produces unknown part of speech
         text = "猫"
         try:
-            tokens = self.analyzer.analyze_text(text)
+            tokens = self.analyzer.parse_text(text)
             # If successful, should return tokens
             assert len(tokens) > 0
             for token in tokens:
-                assert isinstance(token, Token)
+                assert isinstance(token, KotogramToken)
         except ValueError as e:
             # If parsing fails, error should be informative
             assert "Failed to parse part of speech" in str(e) or "Unknown" in str(e)
@@ -289,7 +288,7 @@ class TestErrorHandling:
         # Create a token with potentially unknown values
         text = "猫"
         try:
-            tokens = self.analyzer.analyze_text(text)
+            tokens = self.analyzer.parse_text(text)
             # If successful, should handle unknown values gracefully
             for token in tokens:
                 assert token.pos_detail1.value in [
@@ -309,44 +308,44 @@ class TestErrorHandling:
         """Test handling of unknown verb forms from Janome"""
         text = "行く"
         try:
-            tokens = self.analyzer.analyze_text(text)
+            tokens = self.analyzer.parse_text(text)
             for token in tokens:
                 if token.is_verb:
-                    assert token.conjugation_form.value in [
-                        form.value for form in VerbForm
+                    assert token.infl_form.value in [
+                        form.value for form in InflectionForm
                     ]
-                    assert token.conjugation_type.value in [
-                        conj.value for conj in VerbConjugation
+                    assert token.infl_type.value in [
+                        conj.value for conj in InflectionType
                     ]
         except ValueError as e:
             # If parsing fails, error should be informative
-            assert "Unknown verb form" in str(e) or "Unknown verb conjugation" in str(e)
+            assert "Unknown verb form" in str(e) or "Unknown verb inflection" in str(e)
 
 
 class TestEdgeCases:
     """Test edge cases and special scenarios"""
 
     def setup_method(self):
-        self.analyzer = JanomeAnalyzer()
+        self.analyzer = KotogramAnalyzer()
 
     def test_empty_text(self):
         """Test empty text"""
         text = ""
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         assert len(tokens) == 0
 
     def test_whitespace_only(self):
         """Test whitespace only text"""
         text = "   \n\t  "
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         assert len(tokens) == 0
 
     def test_mixed_content(self):
         """Test mixed content with various types"""
         text = "123 猫 行く は ！"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         # Should have tokens
         assert len(tokens) > 0
@@ -363,7 +362,7 @@ class TestEdgeCases:
     def test_long_text(self):
         """Test longer text"""
         text = "これは長い文章です。複数の文を含んでいます。テスト用の文章です。"
-        tokens = self.analyzer.analyze_text(text)
+        tokens = self.analyzer.parse_text(text)
 
         assert len(tokens) > 10
 
@@ -391,6 +390,7 @@ class TestEnumValues:
             "接尾",
             "接続詞",
             "感動詞",
+            "連体詞",
             "未知語",
         ]
 
@@ -407,21 +407,15 @@ class TestEnumValues:
 
     def test_verb_form_values(self):
         """Test verb form values are valid"""
-        for form in VerbForm:
+        for form in InflectionForm:
             assert form.value
             assert isinstance(form.value, str)
 
-    def test_verb_conjugation_values(self):
-        """Test verb conjugation values are valid"""
-        for conj in VerbConjugation:
+    def test_verb_inflection_values(self):
+        """Test verb inflection values are valid"""
+        for conj in InflectionType:
             assert conj.value
             assert isinstance(conj.value, str)
-
-    def test_auxiliary_verb_type_values(self):
-        """Test auxiliary verb type values are valid"""
-        for aux_type in AuxiliaryVerbType:
-            assert aux_type.value
-            assert isinstance(aux_type.value, str)
 
 
 if __name__ == "__main__":
