@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from .token import KotogramToken
-from .types import DetailType, InflectionForm, PartOfSpeech
+from .types import InflectionForm, PartOfSpeech, POSDetailType
 
 
 class PatternType(Enum):
@@ -28,11 +28,11 @@ class TokenPattern:
     pattern_type: PatternType
 
     # Value to match against
-    value: str | PartOfSpeech | InflectionForm | DetailType | PatternType | None
+    value: str | PartOfSpeech | InflectionForm | POSDetailType | PatternType | None
 
     # For alternative patterns (A/B syntax)
     alternatives: (
-        list[str | PartOfSpeech | InflectionForm | DetailType | PatternType] | None
+        list[str | PartOfSpeech | InflectionForm | POSDetailType | PatternType] | None
     ) = None
 
     # Whether this pattern is optional
@@ -75,7 +75,7 @@ class TokenPattern:
     def _matches_alternative(
         self,
         token: KotogramToken,
-        alternative: str | PartOfSpeech | InflectionForm | DetailType | PatternType,
+        alternative: str | PartOfSpeech | InflectionForm | POSDetailType | PatternType,
     ) -> bool:
         """Check if token matches a specific alternative"""
         if isinstance(alternative, str):
@@ -84,7 +84,7 @@ class TokenPattern:
             return token.part_of_speech == alternative
         elif isinstance(alternative, InflectionForm):
             return token.infl_form == alternative
-        elif isinstance(alternative, DetailType):
+        elif isinstance(alternative, POSDetailType):
             return (
                 token.pos_detail1 == alternative
                 or token.pos_detail2 == alternative
@@ -95,84 +95,6 @@ class TokenPattern:
         ):
             return True
         return False
-
-    @classmethod
-    def from_string(cls, pattern_str: str) -> "TokenPattern":
-        """Create TokenPattern from string representation"""
-        pattern_str = pattern_str.strip()
-
-        # Handle optional patterns
-        optional = False
-        if pattern_str.endswith("?"):
-            optional = True
-            pattern_str = pattern_str[:-1]
-
-        # Handle alternatives (A/B syntax)
-        if "/" in pattern_str:
-            parts = [p.strip() for p in pattern_str.split("/")]
-            alternatives = []
-            for part in parts:
-                alt = cls._parse_single_pattern(part)
-                alternatives.append(alt)
-            return cls(
-                pattern_type=PatternType.ALTERNATIVE,
-                value=alternatives[0],
-                alternatives=alternatives,
-                optional=optional,
-            )
-
-        # Parse single pattern
-        value = cls._parse_single_pattern(pattern_str)
-        pattern_type = cls._determine_pattern_type(value)
-
-        return cls(pattern_type=pattern_type, value=value, optional=optional)
-
-    @staticmethod
-    def _parse_single_pattern(
-        pattern_str: str,
-    ) -> str | PartOfSpeech | InflectionForm | DetailType | PatternType:
-        """Parse a single pattern value"""
-        pattern_str = pattern_str.strip()
-
-        # Handle special patterns
-        if pattern_str == "*":
-            return PatternType.WILDCARD
-
-        # Try to parse as PartOfSpeech
-        try:
-            return PartOfSpeech(pattern_str)
-        except ValueError:
-            pass
-
-        # Try to parse as InflectionForm
-        try:
-            return InflectionForm(pattern_str)
-        except ValueError:
-            pass
-
-        # Try to parse as DetailType
-        try:
-            return DetailType(pattern_str)
-        except ValueError:
-            pass
-
-        # Return as string
-        return pattern_str
-
-    @staticmethod
-    def _determine_pattern_type(
-        value: str | PartOfSpeech | InflectionForm | DetailType | PatternType,
-    ) -> PatternType:
-        """Determine pattern type from value"""
-        if value == PatternType.WILDCARD:
-            return PatternType.WILDCARD
-        if isinstance(value, PartOfSpeech):
-            return PatternType.PART_OF_SPEECH
-        if isinstance(value, InflectionForm):
-            return PatternType.INFLECTION_FORM
-        if isinstance(value, DetailType):
-            return PatternType.DETAIL
-        return PatternType.EXACT
 
 
 @dataclass
@@ -315,15 +237,6 @@ class RuleRegistry:
         """Add a grammar rule to the registry"""
         self.rules.append(rule)
 
-    def add_rule_from_string(
-        self, name: str, pattern_string: str, description: str = ""
-    ):
-        """Add a rule from string representation"""
-        pattern_sequence = [p.strip() for p in pattern_string.split()]
-        patterns = [TokenPattern.from_string(pattern) for pattern in pattern_sequence]
-        rule = GrammarRule(name, patterns, description)
-        self.add_rule(rule)
-
     def match_all(self, tokens: list[KotogramToken]) -> list[MatchResult]:
         """Match all rules against the token sequence"""
         all_matches = []
@@ -400,7 +313,7 @@ def create_default_rules() -> RuleRegistry:
         TokenPattern(pattern_type=PatternType.EXACT, value="で"),
         TokenPattern(pattern_type=PatternType.EXACT, value="ある"),
         TokenPattern(pattern_type=PatternType.EXACT, value="一方"),
-        # TokenPattern(pattern_type=PatternType.EXACT, value="で", optional=True),
+        TokenPattern(pattern_type=PatternType.EXACT, value="で", optional=True),
     ]
     registry.add_rule(
         GrammarRule(
@@ -416,7 +329,7 @@ def create_default_rules() -> RuleRegistry:
         TokenPattern(pattern_type=PatternType.EXACT, value="た"),
         TokenPattern(pattern_type=PatternType.EXACT, value="上"),
         TokenPattern(pattern_type=PatternType.EXACT, value="で"),
-        # TokenPattern(pattern_type=PatternType.EXACT, value="の", optional=True),
+        TokenPattern(pattern_type=PatternType.EXACT, value="の", optional=True),
     ]
     registry.add_rule(
         GrammarRule(

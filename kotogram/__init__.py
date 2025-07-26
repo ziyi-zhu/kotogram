@@ -10,12 +10,12 @@ from .grammar import (
     create_default_rules,
 )
 from .token import KotogramToken
-from .types import DetailType, InflectionForm, InflectionType, PartOfSpeech
+from .types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
 
 __version__ = "0.1.0"
 __all__ = [
     "PartOfSpeech",
-    "DetailType",
+    "POSDetailType",
     "InflectionForm",
     "InflectionType",
     "KotogramToken",

@@ -3,11 +3,11 @@
 import pytest
 
 from kotogram import (
-    DetailType,
     InflectionForm,
     InflectionType,
     KotogramAnalyzer,
     PartOfSpeech,
+    POSDetailType,
 )
 
 
@@ -256,9 +256,9 @@ class TestTokenProperties:
         token = tokens[0]
 
         # Should have valid detail types
-        assert isinstance(token.pos_detail1, DetailType)
-        assert isinstance(token.pos_detail2, DetailType)
-        assert isinstance(token.pos_detail3, DetailType)
+        assert isinstance(token.pos_detail1, POSDetailType)
+        assert isinstance(token.pos_detail2, POSDetailType)
+        assert isinstance(token.pos_detail3, POSDetailType)
         assert isinstance(token.infl_form, InflectionForm)
 
 
@@ -339,7 +339,7 @@ class TestEnumValues:
 
     def test_detail_type_values(self):
         """Test detail type values are valid"""
-        for detail in DetailType:
+        for detail in POSDetailType:
             # Should not be empty
             assert detail.value
             # Should be a string

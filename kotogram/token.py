@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 
-from .types import DetailType, InflectionForm, InflectionType, PartOfSpeech
+from .types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
 
 
 class KotogramToken(BaseModel):
@@ -15,13 +15,13 @@ class KotogramToken(BaseModel):
     part_of_speech: PartOfSpeech = Field(..., description="Part of speech")
 
     # Detailed part of speech 1 (品詞細分類1)
-    pos_detail1: DetailType = Field(..., description="Detailed part of speech 1")
+    pos_detail1: POSDetailType = Field(..., description="Detailed part of speech 1")
 
     # Detailed part of speech 2 (品詞細分類2)
-    pos_detail2: DetailType = Field(..., description="Detailed part of speech 2")
+    pos_detail2: POSDetailType = Field(..., description="Detailed part of speech 2")
 
     # Detailed part of speech 3 (品詞細分類3)
-    pos_detail3: DetailType = Field(..., description="Detailed part of speech 3")
+    pos_detail3: POSDetailType = Field(..., description="Detailed part of speech 3")
 
     # Inflection type (活用型)
     infl_type: InflectionType = Field(..., description="Inflection type")

@@ -2,7 +2,6 @@
 
 
 from kotogram import (
-    DetailType,
     GrammarRule,
     InflectionForm,
     InflectionType,
@@ -10,9 +9,9 @@ from kotogram import (
     KotogramToken,
     PartOfSpeech,
     PatternType,
+    POSDetailType,
     RuleRegistry,
     TokenPattern,
-    create_default_rules,
 )
 
 
@@ -25,9 +24,9 @@ class TestTokenPattern:
         token = KotogramToken(
             surface="赤ちゃん",
             part_of_speech=PartOfSpeech.NOUN,
-            pos_detail1=DetailType.NOUN_GENERAL,
-            pos_detail2=DetailType.UNKNOWN,
-            pos_detail3=DetailType.UNKNOWN,
+            pos_detail1=POSDetailType.NOUN_GENERAL,
+            pos_detail2=POSDetailType.UNKNOWN,
+            pos_detail3=POSDetailType.UNKNOWN,
             infl_type=InflectionType.UNKNOWN,
             infl_form=InflectionForm.UNKNOWN,
             base_form="赤ちゃん",
@@ -44,9 +43,9 @@ class TestTokenPattern:
         token = KotogramToken(
             surface="本",
             part_of_speech=PartOfSpeech.NOUN,
-            pos_detail1=DetailType.NOUN_GENERAL,
-            pos_detail2=DetailType.UNKNOWN,
-            pos_detail3=DetailType.UNKNOWN,
+            pos_detail1=POSDetailType.NOUN_GENERAL,
+            pos_detail2=POSDetailType.UNKNOWN,
+            pos_detail3=POSDetailType.UNKNOWN,
             infl_type=InflectionType.UNKNOWN,
             infl_form=InflectionForm.UNKNOWN,
             base_form="本",
@@ -63,9 +62,9 @@ class TestTokenPattern:
         token = KotogramToken(
             surface="読む",
             part_of_speech=PartOfSpeech.VERB,
-            pos_detail1=DetailType.VERB_INDEPENDENT,
-            pos_detail2=DetailType.UNKNOWN,
-            pos_detail3=DetailType.UNKNOWN,
+            pos_detail1=POSDetailType.VERB_INDEPENDENT,
+            pos_detail2=POSDetailType.UNKNOWN,
+            pos_detail3=POSDetailType.UNKNOWN,
             infl_type=InflectionType.GODAN,
             infl_form=InflectionForm.BASIC,
             base_form="読む",
@@ -82,9 +81,9 @@ class TestTokenPattern:
         token = KotogramToken(
             surface="何でも",
             part_of_speech=PartOfSpeech.NOUN,
-            pos_detail1=DetailType.NOUN_GENERAL,
-            pos_detail2=DetailType.UNKNOWN,
-            pos_detail3=DetailType.UNKNOWN,
+            pos_detail1=POSDetailType.NOUN_GENERAL,
+            pos_detail2=POSDetailType.UNKNOWN,
+            pos_detail3=POSDetailType.UNKNOWN,
             infl_type=InflectionType.UNKNOWN,
             infl_form=InflectionForm.UNKNOWN,
             base_form="何でも",
@@ -103,9 +102,9 @@ class TestTokenPattern:
         verb_token = KotogramToken(
             surface="読む",
             part_of_speech=PartOfSpeech.VERB,
-            pos_detail1=DetailType.VERB_INDEPENDENT,
-            pos_detail2=DetailType.UNKNOWN,
-            pos_detail3=DetailType.UNKNOWN,
+            pos_detail1=POSDetailType.VERB_INDEPENDENT,
+            pos_detail2=POSDetailType.UNKNOWN,
+            pos_detail3=POSDetailType.UNKNOWN,
             infl_type=InflectionType.GODAN,
             infl_form=InflectionForm.BASIC,
             base_form="読む",
@@ -124,9 +123,9 @@ class TestTokenPattern:
         adj_token = KotogramToken(
             surface="美しい",
             part_of_speech=PartOfSpeech.ADJECTIVE,
-            pos_detail1=DetailType.UNKNOWN,
-            pos_detail2=DetailType.UNKNOWN,
-            pos_detail3=DetailType.UNKNOWN,
+            pos_detail1=POSDetailType.UNKNOWN,
+            pos_detail2=POSDetailType.UNKNOWN,
+            pos_detail3=POSDetailType.UNKNOWN,
             infl_type=InflectionType.ADJECTIVE_ISTEM,
             infl_form=InflectionForm.BASIC,
             base_form="美しい",
@@ -154,9 +153,9 @@ class TestGrammarRule:
             KotogramToken(
                 surface="講演",
                 part_of_speech=PartOfSpeech.NOUN,
-                pos_detail1=DetailType.NOUN_GENERAL,
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail1=POSDetailType.NOUN_GENERAL,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.UNKNOWN,
                 infl_form=InflectionForm.UNKNOWN,
                 base_form="講演",
@@ -166,9 +165,9 @@ class TestGrammarRule:
             KotogramToken(
                 surface="の",
                 part_of_speech=PartOfSpeech.PARTICLE,
-                pos_detail1=DetailType.PARTICLE_CASE,
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail1=POSDetailType.PARTICLE_CASE,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.UNKNOWN,
                 infl_form=InflectionForm.UNKNOWN,
                 base_form="の",
@@ -178,9 +177,9 @@ class TestGrammarRule:
             KotogramToken(
                 surface="間",
                 part_of_speech=PartOfSpeech.NOUN,
-                pos_detail1=DetailType.NOUN_GENERAL,
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail1=POSDetailType.NOUN_GENERAL,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.UNKNOWN,
                 infl_form=InflectionForm.UNKNOWN,
                 base_form="間",
@@ -210,9 +209,9 @@ class TestGrammarRule:
             KotogramToken(
                 surface="動詞",
                 part_of_speech=PartOfSpeech.VERB,
-                pos_detail1=DetailType.VERB_INDEPENDENT,
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail1=POSDetailType.VERB_INDEPENDENT,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.GODAN,
                 infl_form=InflectionForm.BASIC,
                 base_form="動詞",
@@ -245,9 +244,9 @@ class TestRuleRegistry:
             KotogramToken(
                 surface="講演",
                 part_of_speech=PartOfSpeech.NOUN,
-                pos_detail1=DetailType.NOUN_GENERAL,
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail1=POSDetailType.NOUN_GENERAL,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.UNKNOWN,
                 infl_form=InflectionForm.UNKNOWN,
                 base_form="講演",
@@ -257,9 +256,9 @@ class TestRuleRegistry:
             KotogramToken(
                 surface="の",
                 part_of_speech=PartOfSpeech.PARTICLE,
-                pos_detail1=DetailType.PARTICLE_CASE,
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail1=POSDetailType.PARTICLE_CASE,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.UNKNOWN,
                 infl_form=InflectionForm.UNKNOWN,
                 base_form="の",
@@ -269,9 +268,9 @@ class TestRuleRegistry:
             KotogramToken(
                 surface="間",
                 part_of_speech=PartOfSpeech.NOUN,
-                pos_detail1=DetailType.NOUN_GENERAL,
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail1=POSDetailType.NOUN_GENERAL,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.UNKNOWN,
                 infl_form=InflectionForm.UNKNOWN,
                 base_form="間",
@@ -283,26 +282,6 @@ class TestRuleRegistry:
         matches = registry.match_all(tokens)
         assert len(matches) == 1
         assert matches[0].rule_name == "test_rule"
-
-    def test_default_rules(self):
-        """Test that default rules are created correctly"""
-        registry = create_default_rules()
-        rule_names = registry.get_rule_names()
-
-        expected_rules = [
-            "～間に",
-            "～間",
-            "～あがる",
-            "～一方（で）",
-            "～上で（の）",
-            "～ないうちに",
-            "～おきに",
-            "～から～にかけて",
-            "～くらい／ぐらい",
-        ]
-
-        for expected_rule in expected_rules:
-            assert expected_rule in rule_names
 
 
 class TestWildcardPatterns:
@@ -320,12 +299,12 @@ class TestWildcardPatterns:
                 surface=surface,
                 part_of_speech=pos,
                 pos_detail1=(
-                    DetailType.NOUN_GENERAL
+                    POSDetailType.NOUN_GENERAL
                     if pos == PartOfSpeech.NOUN
-                    else DetailType.UNKNOWN
+                    else POSDetailType.UNKNOWN
                 ),
-                pos_detail2=DetailType.UNKNOWN,
-                pos_detail3=DetailType.UNKNOWN,
+                pos_detail2=POSDetailType.UNKNOWN,
+                pos_detail3=POSDetailType.UNKNOWN,
                 infl_type=InflectionType.UNKNOWN,
                 infl_form=InflectionForm.UNKNOWN,
                 base_form=surface,

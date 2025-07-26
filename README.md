@@ -151,7 +151,7 @@ Main analyzer class using Janome for tokenization.
 - `NOUN`, `VERB`, `ADJECTIVE`, `ADVERB`, `PARTICLE`, `AUXILIARY_VERB`
 - `SYMBOL`, `PREFIX`, `SUFFIX`, `CONJUNCTION`, `INTERJECTION`, `UNKNOWN`
 
-#### `DetailType`
+#### `POSDetailType`
 Comprehensive enum covering all detail classifications for nouns, verbs, particles, and symbols.
 
 #### `InflectionForm`

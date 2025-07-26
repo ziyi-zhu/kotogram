@@ -21,7 +21,7 @@ class PartOfSpeech(Enum):
     UNKNOWN = "未知語"
 
 
-class DetailType(Enum):
+class POSDetailType(Enum):
     """Unified detailed classification"""
 
     # Noun-related
@@ -34,7 +34,6 @@ class DetailType(Enum):
     NOUN_COUNTER = "助数詞"
     NOUN_ADVERBIAL = "副詞可能"
     NOUN_SAHEN = "サ変接続"
-    NOUN_ADJECTIVE_VERBAL = "形容動詞語幹"
     NOUN_SUFFIX = "接尾"
     NOUN_VERBAL = "動詞非自立的"
     NOUN_SPECIAL = "特殊"
@@ -44,6 +43,8 @@ class DetailType(Enum):
     NOUN_COUNTRY = "国"
     NOUN_ADVERBIALIZATION = "副詞化"
     NOUN_CONNECTION = "名詞接続"
+    NOUN_ADJECTIVE_VERBAL_STEM = "形容動詞語幹"
+    NOUN_NAI_ADJECTIVE_STEM = "ナイ形容詞語幹"
 
     # Verb-related
     VERB_INDEPENDENT = "自立"
@@ -95,7 +96,7 @@ class InflectionForm(Enum):
 
 
 class InflectionType(Enum):
-    """Inflection types (merged from previous inflection and auxiliary verb types)"""
+    """Inflection types"""
 
     GODAN = "五段・ラ行"
     GODAN_AL = "五段・ラ行アル"
@@ -130,15 +131,4 @@ class InflectionType(Enum):
     SPECIAL_RERU = "特殊・レル"
     SPECIAL_RU = "特殊・ル"
     SPECIAL_U = "特殊・ウ"
-    SPECIAL_YOU_SPECIAL = "特殊・ヨウ・ニ"
-    SPECIAL_DA_SPECIAL = "特殊・ダ・ニ"
-    SPECIAL_DA_SPECIAL2 = "特殊・ダ・ニ・ダ"
-    SPECIAL_DA_SPECIAL3 = "特殊・ダ・ニ・デ"
-    SPECIAL_DA_SPECIAL4 = "特殊・ダ・ニ・デ・ダ"
-    SPECIAL_DA_SPECIAL5 = "特殊・ダ・ニ・デ・ダ・ニ"
-    SPECIAL_DA_SPECIAL6 = "特殊・ダ・ニ・デ・ダ・ニ・ダ"
-    SPECIAL_DA_SPECIAL7 = "特殊・ダ・ニ・デ・ダ・ニ・ダ・ニ"
-    SPECIAL_DA_SPECIAL8 = "特殊・ダ・ニ・デ・ダ・ニ・ダ・ニ・ダ"
-    SPECIAL_DA_SPECIAL9 = "特殊・ダ・ニ・デ・ダ・ニ・ダ・ニ・ダ・ニ"
-    SPECIAL_DA_SPECIAL10 = "特殊・ダ・ニ・デ・ダ・ニ・ダ・ニ・ダ・ニ・ダ"
     UNKNOWN = "*"

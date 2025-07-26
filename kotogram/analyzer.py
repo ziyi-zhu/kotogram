@@ -3,7 +3,7 @@
 from janome.tokenizer import Token, Tokenizer
 
 from .token import KotogramToken
-from .types import DetailType, InflectionForm, InflectionType, PartOfSpeech
+from .types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
 
 
 class KotogramAnalyzer:
@@ -13,10 +13,10 @@ class KotogramAnalyzer:
         self.tokenizer = Tokenizer()
 
     @staticmethod
-    def parse_detail_type(value: str) -> DetailType:
-        """Convert string to DetailType"""
+    def parse_detail_type(value: str) -> POSDetailType:
+        """Convert string to POSDetailType"""
         try:
-            return DetailType(value)
+            return POSDetailType(value)
         except ValueError:
             raise ValueError(f"Unknown detail type: '{value}'")
 
