@@ -27,7 +27,7 @@ class DetailType(Enum):
     NOUN_GENERAL = "一般"
     NOUN_PROPER = "固有名詞"
     NOUN_PERSONAL = "人名"
-    NOUN_PLACE = "地名"
+    NOUN_SURNAME = "姓"
     NOUN_ORGANIZATION = "組織"
     NOUN_NUMERAL = "数"
     NOUN_ADVERBIAL = "副詞可能"
@@ -40,6 +40,7 @@ class DetailType(Enum):
     NOUN_PRONOUN = "代名詞"
     NOUN_REGION = "地域"
     NOUN_COUNTRY = "国"
+    NOUN_ADVERBIALIZATION = "副詞化"
 
     # Verb-related
     VERB_INDEPENDENT = "自立"

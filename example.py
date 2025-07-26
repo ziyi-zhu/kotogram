@@ -5,18 +5,19 @@ from kotogram import JanomeAnalyzer
 
 
 def main():
-    """Main example function"""
-    # Initialize Janome analyzer
     analyzer = JanomeAnalyzer()
 
-    # Test text
-    text = "最新の企画書が出来あがったので、どうぞご覧ください。"
+    examples = [
+        "最新の企画書が出来あがったので、どうぞご覧ください。",
+        "赤ちゃんが寝ている間に、洗濯をしました。",
+        "山田先生の講演の間、皆熱心に話を聞いていた。",
+    ]
 
-    # Analyze text
-    tokens = analyzer.analyze_text(text)
-
-    # Display results
-    analyzer.print_tokens(tokens)
+    for text in examples:
+        print(f"=== {text} ===")
+        tokens = analyzer.analyze_text(text)
+        analyzer.print_tokens(tokens)
+        print(tokens)
 
 
 if __name__ == "__main__":
