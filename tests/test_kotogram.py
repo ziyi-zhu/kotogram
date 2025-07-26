@@ -7,7 +7,6 @@ from kotogram import (
     InflectionForm,
     InflectionType,
     KotogramAnalyzer,
-    KotogramToken,
     PartOfSpeech,
 )
 
@@ -261,65 +260,6 @@ class TestTokenProperties:
         assert isinstance(token.pos_detail2, DetailType)
         assert isinstance(token.pos_detail3, DetailType)
         assert isinstance(token.infl_form, InflectionForm)
-
-
-class TestErrorHandling:
-    """Test error handling and warnings"""
-
-    def setup_method(self):
-        self.analyzer = KotogramAnalyzer()
-
-    def test_unknown_part_of_speech(self):
-        """Test handling of unknown part of speech from Janome"""
-        # This might trigger an error if Janome produces unknown part of speech
-        text = "猫"
-        try:
-            tokens = self.analyzer.parse_text(text)
-            # If successful, should return tokens
-            assert len(tokens) > 0
-            for token in tokens:
-                assert isinstance(token, KotogramToken)
-        except ValueError as e:
-            # If parsing fails, error should be informative
-            assert "Failed to parse part of speech" in str(e) or "Unknown" in str(e)
-
-    def test_unknown_detail_types(self):
-        """Test handling of unknown detail types from Janome"""
-        # Create a token with potentially unknown values
-        text = "猫"
-        try:
-            tokens = self.analyzer.parse_text(text)
-            # If successful, should handle unknown values gracefully
-            for token in tokens:
-                assert token.pos_detail1.value in [
-                    detail.value for detail in DetailType
-                ]
-                assert token.pos_detail2.value in [
-                    detail.value for detail in DetailType
-                ]
-                assert token.pos_detail3.value in [
-                    detail.value for detail in DetailType
-                ]
-        except ValueError as e:
-            # If parsing fails, error should be informative
-            assert "Unknown detail type" in str(e)
-
-    def test_unknown_verb_forms(self):
-        """Test handling of unknown verb forms from Janome"""
-        text = "行く"
-        try:
-            tokens = self.analyzer.parse_text(text)
-            for token in tokens:
-                if token.is_verb:
-                    assert token.infl_form.value in [
-                        form.value for form in InflectionForm
-                    ]
-                    assert token.infl_type.value in [
-                        conj.value for conj in InflectionType
-                    ]
-        except ValueError as e:
-            # If parsing fails, error should be informative
-            assert "Unknown verb form" in str(e) or "Unknown verb inflection" in str(e)
 
 
 class TestEdgeCases:

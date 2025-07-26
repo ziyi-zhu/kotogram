@@ -1,6 +1,5 @@
 """Grammar rule matching system for Japanese patterns"""
 
-from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -17,6 +16,7 @@ class PatternType(Enum):
     BASE_FORM = "base_form"
     DETAIL = "detail"
     WILDCARD = "wildcard"
+    MULTI_WILDCARD = "multi_wildcard"
     ALTERNATIVE = "alternative"
 
 
@@ -28,24 +28,18 @@ class TokenPattern:
     pattern_type: PatternType
 
     # Value to match against
-    value: str | PartOfSpeech | InflectionForm | DetailType | PatternType
+    value: str | PartOfSpeech | InflectionForm | DetailType | PatternType | None
 
     # For alternative patterns (A/B syntax)
-    alternatives: list[
-        str | PartOfSpeech | InflectionForm | DetailType | PatternType
-    ] | None = None
+    alternatives: (
+        list[str | PartOfSpeech | InflectionForm | DetailType | PatternType] | None
+    ) = None
 
     # Whether this pattern is optional
     optional: bool = False
 
-    # Custom matching function
-    custom_matcher: Callable[[KotogramToken], bool] | None = None
-
     def matches(self, token: KotogramToken) -> bool:
         """Check if token matches this pattern"""
-        if self.custom_matcher:
-            return self.custom_matcher(token)
-
         if self.pattern_type == PatternType.EXACT:
             return token.surface == self.value or token.base_form == self.value
 
@@ -66,6 +60,9 @@ class TokenPattern:
             )
 
         elif self.pattern_type == PatternType.WILDCARD:
+            return True
+
+        elif self.pattern_type == PatternType.MULTI_WILDCARD:
             return True
 
         elif self.pattern_type == PatternType.ALTERNATIVE:
@@ -193,10 +190,17 @@ class MatchResult:
 class GrammarRule:
     """Grammar rule with pattern sequence"""
 
-    def __init__(self, name: str, patterns: list[TokenPattern], description: str = ""):
+    def __init__(
+        self,
+        name: str,
+        patterns: list[TokenPattern],
+        description: str = "",
+        tag: str | None = None,
+    ):
         self.name = name
-        self.description = description
         self.patterns = patterns
+        self.description = description
+        self.tag = tag
 
     def match(
         self, tokens: list[KotogramToken], start_pos: int = 0
@@ -211,6 +215,53 @@ class GrammarRule:
 
         while pattern_index < len(self.patterns):
             pattern = self.patterns[pattern_index]
+
+            # MULTI_WILDCARD: match any number of tokens (including zero) until next pattern matches
+            if pattern.pattern_type == PatternType.MULTI_WILDCARD:
+                next_index = pattern_index + 1
+                if next_index == len(self.patterns):
+                    # If MULTI_WILDCARD is last, consume all remaining tokens
+                    matched_tokens.extend(tokens[current_pos:])
+                    current_pos = len(tokens)
+                    pattern_index += 1
+                    continue
+                # Try to find a match for the remaining pattern sequence
+                for skip in range(0, len(tokens) - current_pos + 1):
+                    if current_pos + skip >= len(tokens):
+                        break
+
+                    # Create a sub-rule with remaining patterns and test it
+                    remaining_patterns = self.patterns[next_index:]
+                    if remaining_patterns:
+                        temp_rule = GrammarRule("temp", remaining_patterns)
+                        temp_match = temp_rule.match(tokens, current_pos + skip)
+                        if temp_match:
+                            # We found a valid match for the remaining patterns
+                            # Add skipped tokens as matched
+                            matched_tokens.extend(
+                                tokens[current_pos : current_pos + skip]
+                            )
+                            # Add the remaining matched tokens
+                            matched_tokens.extend(temp_match.matched_tokens)
+                            return MatchResult(
+                                rule_name=self.name,
+                                start_pos=start_pos,
+                                end_pos=temp_match.end_pos,
+                                matched_tokens=matched_tokens,
+                                description=self.description,
+                            )
+                    else:
+                        # No remaining patterns, so we match everything
+                        matched_tokens.extend(tokens[current_pos:])
+                        return MatchResult(
+                            rule_name=self.name,
+                            start_pos=start_pos,
+                            end_pos=len(tokens),
+                            matched_tokens=matched_tokens,
+                            description=self.description,
+                        )
+
+                return None
 
             # Check if we've reached the end of tokens
             if current_pos >= len(tokens):
@@ -303,23 +354,6 @@ def create_default_rules() -> RuleRegistry:
     """Create default grammar rules for Japanese patterns"""
     registry = RuleRegistry()
 
-    # 動詞普通形＋間に - More flexible to match "寝ている間に"
-    patterns_verb_basic_maida = [
-        TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.VERB),
-        TokenPattern(pattern_type=PatternType.EXACT, value="て"),
-        TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.VERB),
-        TokenPattern(pattern_type=PatternType.EXACT, value="間"),
-        TokenPattern(pattern_type=PatternType.EXACT, value="に"),
-    ]
-    registry.add_rule(
-        GrammarRule(
-            "動詞普通形＋間に",
-            patterns_verb_basic_maida,
-            "Verb followed by 'て', another verb, '間' and 'に' (while)",
-        )
-    )
-
-    # 名詞＋の＋間
     patterns_noun_no_aida = [
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
         TokenPattern(pattern_type=PatternType.EXACT, value="の"),
@@ -327,57 +361,72 @@ def create_default_rules() -> RuleRegistry:
     ]
     registry.add_rule(
         GrammarRule(
-            "名詞＋の＋間",
-            patterns_noun_no_aida,
-            "Noun followed by 'の' and '間' (during)",
+            name="～間",
+            patterns=patterns_noun_no_aida,
+            description="名詞＋の＋間",
+            tag="N3-1",
         )
     )
 
-    # 動詞「ます形」＋あがる - More flexible to match "出来あがった"
-    patterns_verb_masu_agaru = [
+    patterns_verb_basic_maida = [
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.VERB),
-        TokenPattern(pattern_type=PatternType.EXACT, value="あがっ"),
-        TokenPattern(pattern_type=PatternType.EXACT, value="た"),
+        TokenPattern(pattern_type=PatternType.EXACT, value="間"),
+        TokenPattern(pattern_type=PatternType.EXACT, value="に"),
     ]
     registry.add_rule(
         GrammarRule(
-            "動詞「ます形」＋あがる",
-            patterns_verb_masu_agaru,
-            "Verb followed by 'あがっ' and 'た' (completed)",
+            name="～間に",
+            patterns=patterns_verb_basic_maida,
+            description="動詞普通形＋間に",
+            tag="N3-2",
         )
     )
 
-    # 名詞＋である＋一方
+    patterns_verb_masu_agaru = [
+        TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.VERB),
+        TokenPattern(pattern_type=PatternType.EXACT, value="あがる"),
+    ]
+    registry.add_rule(
+        GrammarRule(
+            name="～あがる",
+            patterns=patterns_verb_masu_agaru,
+            description="動詞「ます形」＋あがる",
+            tag="N3-3",
+        )
+    )
+
     patterns_noun_de_aru_ippou = [
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
         TokenPattern(pattern_type=PatternType.EXACT, value="で"),
         TokenPattern(pattern_type=PatternType.EXACT, value="ある"),
         TokenPattern(pattern_type=PatternType.EXACT, value="一方"),
+        # TokenPattern(pattern_type=PatternType.EXACT, value="で", optional=True),
     ]
     registry.add_rule(
         GrammarRule(
-            "名詞＋である＋一方",
-            patterns_noun_de_aru_ippou,
-            "Noun followed by 'で', 'ある', and '一方' (on the other hand)",
+            name="～一方（で）",
+            patterns=patterns_noun_de_aru_ippou,
+            description="名詞＋である＋一方（で）",
+            tag="N3-5",
         )
     )
 
-    # 名詞＋動詞「た形」＋上で - More flexible to match "伺った上で"
     patterns_noun_verb_ta_uede = [
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.VERB),
         TokenPattern(pattern_type=PatternType.EXACT, value="た"),
         TokenPattern(pattern_type=PatternType.EXACT, value="上"),
         TokenPattern(pattern_type=PatternType.EXACT, value="で"),
+        # TokenPattern(pattern_type=PatternType.EXACT, value="の", optional=True),
     ]
     registry.add_rule(
         GrammarRule(
-            "名詞＋動詞「た形」＋上で",
-            patterns_noun_verb_ta_uede,
-            "Verb followed by 'た', '上' and 'で' (after)",
+            name="～上で（の）",
+            patterns=patterns_noun_verb_ta_uede,
+            description="名詞＋動詞「た形」＋上で（の）",
+            tag="N3-7",
         )
     )
 
-    # 動詞「ない形」＋ない＋うちに - More flexible to match "こないうちに"
     patterns_verb_negative_uchini = [
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.VERB),
         TokenPattern(pattern_type=PatternType.EXACT, value="ない"),
@@ -386,58 +435,61 @@ def create_default_rules() -> RuleRegistry:
     ]
     registry.add_rule(
         GrammarRule(
-            "動詞「ない形」＋ない＋うちに",
-            patterns_verb_negative_uchini,
-            "Verb followed by 'ない', 'うち' and 'に' (before)",
+            name="～ないうちに",
+            patterns=patterns_verb_negative_uchini,
+            description="動詞「ない形」＋ない＋うちに",
+            tag="N3-10",
         )
     )
 
-    # 数量詞＋おきに - More flexible to match "5メートルおきに"
     patterns_numeral_okini = [
-        TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
         TokenPattern(pattern_type=PatternType.EXACT, value="おき"),
         TokenPattern(pattern_type=PatternType.EXACT, value="に"),
     ]
     registry.add_rule(
         GrammarRule(
-            "数量詞＋おきに",
-            patterns_numeral_okini,
-            "Two nouns followed by 'おき' and 'に' (every)",
+            name="～おきに",
+            patterns=patterns_numeral_okini,
+            description="数量詞＋おきに",
+            tag="N3-12",
         )
     )
 
-    # 名詞＋から＋名詞＋にかけて - More flexible to match "11月から3月にかけて"
     patterns_noun_kara_noun_nikakete = [
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
-        TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
         TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-        TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
+        TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
         TokenPattern(pattern_type=PatternType.EXACT, value="にかけて"),
     ]
     registry.add_rule(
         GrammarRule(
-            "名詞＋から＋名詞＋にかけて",
-            patterns_noun_kara_noun_nikakete,
-            "Two nouns, 'から', two more nouns, and 'にかけて' (from...to)",
+            name="～から～にかけて",
+            patterns=patterns_noun_kara_noun_nikakete,
+            description="名詞＋から＋名詞＋にかけて",
+            tag="N3-19",
         )
     )
 
-    # ～ぐらい～はない
     patterns_gurai_wa_nai = [
-        TokenPattern(pattern_type=PatternType.EXACT, value="ぐらい"),
         TokenPattern(pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN),
-        TokenPattern(pattern_type=PatternType.EXACT, value="な"),
-        TokenPattern(pattern_type=PatternType.EXACT, value="もの"),
+        TokenPattern(
+            pattern_type=PatternType.ALTERNATIVE,
+            value="ぐらい",
+            alternatives=["ぐらい", "くらい"],
+        ),
+        TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
         TokenPattern(pattern_type=PatternType.EXACT, value="は"),
+        TokenPattern(pattern_type=PatternType.EXACT, value="い", optional=True),
         TokenPattern(pattern_type=PatternType.EXACT, value="ない"),
     ]
     registry.add_rule(
         GrammarRule(
-            "～ぐらい～はない",
-            patterns_gurai_wa_nai,
-            "Pattern 'ぐらい...はない' (nothing is as...as)",
+            name="～くらい／ぐらい",
+            patterns=patterns_gurai_wa_nai,
+            description="～ぐらい～はない",
+            tag="N3-23",
         )
     )
 

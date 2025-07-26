@@ -97,7 +97,6 @@ class InflectionForm(Enum):
 class InflectionType(Enum):
     """Inflection types (merged from previous inflection and auxiliary verb types)"""
 
-    # Verb inflection types
     GODAN = "五段・ラ行"
     GODAN_AL = "五段・ラ行アル"
     GODAN_SPECIAL = "五段・ラ行特殊"
