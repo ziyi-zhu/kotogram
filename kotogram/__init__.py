@@ -1,14 +1,7 @@
 """Kotogram - Japanese Morphological Analysis Package"""
 
 from .analyzer import KotogramAnalyzer
-from .grammar import (
-    GrammarRule,
-    MatchResult,
-    PatternType,
-    RuleRegistry,
-    TokenPattern,
-    create_default_rules,
-)
+from .grammar import GrammarRule, MatchResult, RuleRegistry, TokenPattern
 from .token import KotogramToken
 from .types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
 
@@ -24,6 +17,4 @@ __all__ = [
     "GrammarRule",
     "RuleRegistry",
     "MatchResult",
-    "PatternType",
-    "create_default_rules",
 ]

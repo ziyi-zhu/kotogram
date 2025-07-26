@@ -2,7 +2,7 @@
 
 import pytest
 
-from kotogram import KotogramAnalyzer, create_default_rules
+from kotogram import KotogramAnalyzer, RuleRegistry
 
 
 class TestIntegration:
@@ -12,7 +12,8 @@ class TestIntegration:
     def setup(self):
         """Set up analyzer and registry"""
         self.analyzer = KotogramAnalyzer()
-        self.registry = create_default_rules()
+        self.registry = RuleRegistry()
+        self.registry.load_rules_from_directory("rules")
 
     def _test_rule_matches(self, rule_name, sentences):
         """Helper method to test if a rule matches in given sentences"""

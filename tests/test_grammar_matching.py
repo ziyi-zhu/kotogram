@@ -1,5 +1,6 @@
 """Tests for grammar matching system"""
 
+import pytest
 
 from kotogram import (
     GrammarRule,
@@ -8,7 +9,6 @@ from kotogram import (
     KotogramAnalyzer,
     KotogramToken,
     PartOfSpeech,
-    PatternType,
     POSDetailType,
     RuleRegistry,
     TokenPattern,
@@ -20,7 +20,7 @@ class TestTokenPattern:
 
     def test_exact_match(self):
         """Test exact surface form matching"""
-        pattern = TokenPattern(pattern_type=PatternType.EXACT, value="赤ちゃん")
+        pattern = TokenPattern(value="赤ちゃん")
         token = KotogramToken(
             surface="赤ちゃん",
             part_of_speech=PartOfSpeech.NOUN,
@@ -37,9 +37,7 @@ class TestTokenPattern:
 
     def test_part_of_speech_match(self):
         """Test part of speech matching"""
-        pattern = TokenPattern(
-            pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-        )
+        pattern = TokenPattern(part_of_speech=PartOfSpeech.NOUN)
         token = KotogramToken(
             surface="本",
             part_of_speech=PartOfSpeech.NOUN,
@@ -56,9 +54,7 @@ class TestTokenPattern:
 
     def test_inflection_form_match(self):
         """Test inflection form matching"""
-        pattern = TokenPattern(
-            pattern_type=PatternType.INFLECTION_FORM, value=InflectionForm.BASIC
-        )
+        pattern = TokenPattern(infl_form=InflectionForm.BASIC)
         token = KotogramToken(
             surface="読む",
             part_of_speech=PartOfSpeech.VERB,
@@ -74,10 +70,8 @@ class TestTokenPattern:
         assert pattern.matches(token)
 
     def test_wildcard_match(self):
-        """Test wildcard matching"""
-        pattern = TokenPattern(
-            pattern_type=PatternType.WILDCARD, value=PatternType.WILDCARD
-        )
+        """Test wildcard matching (multi-wildcard when all fields None)"""
+        pattern = TokenPattern()  # Empty pattern = multi-wildcard
         token = KotogramToken(
             surface="何でも",
             part_of_speech=PartOfSpeech.NOUN,
@@ -95,9 +89,10 @@ class TestTokenPattern:
     def test_alternative_match_verb(self):
         """Test alternative pattern matching with verb"""
         pattern = TokenPattern(
-            pattern_type=PatternType.ALTERNATIVE,
-            value=PartOfSpeech.VERB,
-            alternatives=[PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE],
+            alternatives=[
+                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                TokenPattern(part_of_speech=PartOfSpeech.ADJECTIVE),
+            ]
         )
         verb_token = KotogramToken(
             surface="読む",
@@ -116,9 +111,10 @@ class TestTokenPattern:
     def test_alternative_match_adjective(self):
         """Test alternative pattern matching with adjective"""
         pattern = TokenPattern(
-            pattern_type=PatternType.ALTERNATIVE,
-            value=PartOfSpeech.VERB,
-            alternatives=[PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE],
+            alternatives=[
+                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                TokenPattern(part_of_speech=PartOfSpeech.ADJECTIVE),
+            ]
         )
         adj_token = KotogramToken(
             surface="美しい",
@@ -141,13 +137,11 @@ class TestGrammarRule:
     def test_simple_rule_match(self):
         """Test simple grammar rule matching"""
         patterns = [
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="の"),
-            TokenPattern(pattern_type=PatternType.EXACT, value="間"),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="の"),
+            TokenPattern(value="間"),
         ]
-        rule = GrammarRule("test_rule", patterns, "Test rule")
+        rule = GrammarRule(name="test_rule", patterns=patterns, description="Test rule")
 
         tokens = [
             KotogramToken(
@@ -197,13 +191,11 @@ class TestGrammarRule:
     def test_rule_no_match(self):
         """Test grammar rule when no match is found"""
         patterns = [
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="の"),
-            TokenPattern(pattern_type=PatternType.EXACT, value="間"),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="の"),
+            TokenPattern(value="間"),
         ]
-        rule = GrammarRule("test_rule", patterns, "Test rule")
+        rule = GrammarRule(name="test_rule", patterns=patterns, description="Test rule")
 
         tokens = [
             KotogramToken(
@@ -231,13 +223,13 @@ class TestRuleRegistry:
         """Test adding and matching rules"""
         registry = RuleRegistry()
         patterns = [
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="の"),
-            TokenPattern(pattern_type=PatternType.EXACT, value="間"),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="の"),
+            TokenPattern(value="間"),
         ]
-        rule = GrammarRule("test_rule", patterns, "Test description")
+        rule = GrammarRule(
+            name="test_rule", patterns=patterns, description="Test description"
+        )
         registry.add_rule(rule)
 
         tokens = [
@@ -318,11 +310,11 @@ class TestWildcardPatterns:
         """Test basic wildcard matching"""
         # Pattern: から + * + です
         patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="です"),
+            TokenPattern(value="から"),
+            TokenPattern(),
+            TokenPattern(value="です"),
         ]
-        rule = GrammarRule("test_wildcard", patterns)
+        rule = GrammarRule(name="test_wildcard", patterns=patterns)
 
         # Test tokens: から + 何か + です
         tokens = self._create_test_tokens(
@@ -342,11 +334,11 @@ class TestWildcardPatterns:
         """Test multi-wildcard matching zero tokens"""
         # Pattern: から + ** + です (should match "から です")
         patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="です"),
+            TokenPattern(value="から"),
+            TokenPattern(),
+            TokenPattern(value="です"),
         ]
-        rule = GrammarRule("test_multi_wildcard_zero", patterns)
+        rule = GrammarRule(name="test_multi_wildcard_zero", patterns=patterns)
 
         # Test tokens: から + です (no tokens in between)
         tokens = self._create_test_tokens(
@@ -365,11 +357,11 @@ class TestWildcardPatterns:
         """Test multi-wildcard matching multiple tokens"""
         # Pattern: から + ** + です (should match "から A B C です")
         patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="です"),
+            TokenPattern(value="から"),
+            TokenPattern(),
+            TokenPattern(value="です"),
         ]
-        rule = GrammarRule("test_multi_wildcard_multiple", patterns)
+        rule = GrammarRule(name="test_multi_wildcard_multiple", patterns=patterns)
 
         # Test tokens: から + A + B + C + です
         tokens = self._create_test_tokens(
@@ -397,17 +389,13 @@ class TestWildcardPatterns:
         """Test multi-wildcard followed by specific pattern (like the bug we fixed)"""
         # Pattern: NOUN + から + ** + NOUN + にかけて
         patterns = [
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="にかけて"),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="から"),
+            TokenPattern(),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="にかけて"),
         ]
-        rule = GrammarRule("test_compound_noun_pattern", patterns)
+        rule = GrammarRule(name="test_compound_noun_pattern", patterns=patterns)
 
         # Test tokens: 月 + から + 3 + 月 + にかけて (compound noun case)
         tokens = self._create_test_tokens(
@@ -435,14 +423,12 @@ class TestWildcardPatterns:
         """Test that multi-wildcard chooses the correct match when multiple candidates exist"""
         # Pattern: から + ** + NOUN + です
         patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="です"),
+            TokenPattern(value="から"),
+            TokenPattern(),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="です"),
         ]
-        rule = GrammarRule("test_multi_wildcard_choice", patterns)
+        rule = GrammarRule(name="test_multi_wildcard_choice", patterns=patterns)
 
         # Test tokens: から + NOUN1 + VERB + NOUN2 + です
         # Should match NOUN2, not NOUN1, because NOUN2 is followed by です
@@ -471,14 +457,12 @@ class TestWildcardPatterns:
         """Test that multi-wildcard fails when remaining pattern cannot be completed"""
         # Pattern: から + ** + NOUN + です
         patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="です"),
+            TokenPattern(value="から"),
+            TokenPattern(),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="です"),
         ]
-        rule = GrammarRule("test_multi_wildcard_no_match", patterns)
+        rule = GrammarRule(name="test_multi_wildcard_no_match", patterns=patterns)
 
         # Test tokens: から + NOUN + VERB (missing です)
         tokens = self._create_test_tokens(
@@ -496,10 +480,10 @@ class TestWildcardPatterns:
         """Test multi-wildcard at the end of pattern"""
         # Pattern: から + **
         patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
+            TokenPattern(value="から"),
+            TokenPattern(),
         ]
-        rule = GrammarRule("test_multi_wildcard_end", patterns)
+        rule = GrammarRule(name="test_multi_wildcard_end", patterns=patterns)
 
         # Test tokens: から + A + B + C (should consume all remaining)
         tokens = self._create_test_tokens(
@@ -517,59 +501,32 @@ class TestWildcardPatterns:
         assert [t.surface for t in match.matched_tokens] == ["から", "A", "B", "C"]
 
     def test_multiple_multi_wildcards(self):
-        """Test pattern with multiple multi-wildcards"""
-        # Pattern: A + ** + B + ** + C
+        """Test that multiple multi-wildcards are not allowed"""
+        # Pattern: A + ** + B + ** + C (should raise ValueError)
         patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="A"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="B"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="C"),
-        ]
-        rule = GrammarRule("test_multiple_multi_wildcards", patterns)
-
-        # Test tokens: A + X + Y + B + Z + C
-        tokens = self._create_test_tokens(
-            [
-                ("A", PartOfSpeech.NOUN),
-                ("X", PartOfSpeech.VERB),
-                ("Y", PartOfSpeech.PARTICLE),
-                ("B", PartOfSpeech.NOUN),
-                ("Z", PartOfSpeech.VERB),
-                ("C", PartOfSpeech.NOUN),
-            ]
-        )
-
-        match = rule.match(tokens, 0)
-        assert match is not None
-        assert len(match.matched_tokens) == 6
-        assert [t.surface for t in match.matched_tokens] == [
-            "A",
-            "X",
-            "Y",
-            "B",
-            "Z",
-            "C",
+            TokenPattern(value="A"),
+            TokenPattern(),
+            TokenPattern(value="B"),
+            TokenPattern(),
+            TokenPattern(value="C"),
         ]
 
-    def test_wildcard_vs_multi_wildcard_difference(self):
-        """Test the difference between wildcard (*) and multi-wildcard (**)"""
-        # Wildcard pattern: から + * + です (matches exactly one token)
-        wildcard_patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="です"),
-        ]
-        wildcard_rule = GrammarRule("test_wildcard", wildcard_patterns)
+        # Should raise ValueError for multiple multi-wildcards
+        with pytest.raises(
+            ValueError, match="Only one multi-wildcard per rule is allowed"
+        ):
+            GrammarRule(name="test_multiple_multi_wildcards", patterns=patterns)
 
+    def test_multi_wildcard_behavior(self):
+        """Test multi-wildcard behavior (all empty patterns are now multi-wildcards)"""
         # Multi-wildcard pattern: から + ** + です (matches any number of tokens)
         multi_wildcard_patterns = [
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="です"),
+            TokenPattern(value="から"),
+            TokenPattern(),  # Multi-wildcard (empty pattern)
+            TokenPattern(value="です"),
         ]
         multi_wildcard_rule = GrammarRule(
-            "test_multi_wildcard", multi_wildcard_patterns
+            name="test_multi_wildcard", patterns=multi_wildcard_patterns
         )
 
         # Test with zero tokens between から and です
@@ -580,11 +537,8 @@ class TestWildcardPatterns:
             ]
         )
 
-        wildcard_match = wildcard_rule.match(tokens_zero, 0)
-        multi_wildcard_match = multi_wildcard_rule.match(tokens_zero, 0)
-
-        assert wildcard_match is None  # Wildcard requires exactly one token
-        assert multi_wildcard_match is not None  # Multi-wildcard can match zero tokens
+        match_zero = multi_wildcard_rule.match(tokens_zero, 0)
+        assert match_zero is not None  # Multi-wildcard can match zero tokens
 
         # Test with one token between から and です
         tokens_one = self._create_test_tokens(
@@ -595,11 +549,8 @@ class TestWildcardPatterns:
             ]
         )
 
-        wildcard_match = wildcard_rule.match(tokens_one, 0)
-        multi_wildcard_match = multi_wildcard_rule.match(tokens_one, 0)
-
-        assert wildcard_match is not None  # Wildcard matches exactly one token
-        assert multi_wildcard_match is not None  # Multi-wildcard can match one token
+        match_one = multi_wildcard_rule.match(tokens_one, 0)
+        assert match_one is not None  # Multi-wildcard can match one token
 
         # Test with multiple tokens between から and です
         tokens_multiple = self._create_test_tokens(
@@ -611,26 +562,19 @@ class TestWildcardPatterns:
             ]
         )
 
-        wildcard_match = wildcard_rule.match(tokens_multiple, 0)
-        multi_wildcard_match = multi_wildcard_rule.match(tokens_multiple, 0)
-
-        assert wildcard_match is None  # Wildcard cannot match multiple tokens
-        assert (
-            multi_wildcard_match is not None
-        )  # Multi-wildcard can match multiple tokens
+        match_multiple = multi_wildcard_rule.match(tokens_multiple, 0)
+        assert match_multiple is not None  # Multi-wildcard can match multiple tokens
 
     def test_real_world_integration_with_analyzer(self):
         """Test wildcard patterns with real Japanese text analysis"""
         # Create a rule that uses multi-wildcard to match flexible patterns
         patterns = [
-            TokenPattern(
-                pattern_type=PatternType.PART_OF_SPEECH, value=PartOfSpeech.NOUN
-            ),
-            TokenPattern(pattern_type=PatternType.EXACT, value="から"),
-            TokenPattern(pattern_type=PatternType.MULTI_WILDCARD, value=None),
-            TokenPattern(pattern_type=PatternType.EXACT, value="まで"),
+            TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+            TokenPattern(value="から"),
+            TokenPattern(),
+            TokenPattern(value="まで"),
         ]
-        rule = GrammarRule("test_real_world", patterns)
+        rule = GrammarRule(name="test_real_world", patterns=patterns)
 
         # Test with real Japanese text
         text = "東京から大阪まで"
