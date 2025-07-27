@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kotogram"
 version = "0.1.0"
-description = "Japanese morphological analysis library"
+description = "Japanese morphological analysis library with FastAPI REST API"
 authors = [
     {name = "Your Name", email = "your.email@example.com"}
 ]
@@ -14,8 +14,8 @@ requires-python = ">=3.10"
 dependencies = [
     "janome>=0.4.2",
     "pydantic>=2.0.0",
-    "ipython>=8.0.0",
-    "pdbpp>=0.10.3",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
     "loguru>=0.7.0",
 ]
 
@@ -29,6 +29,12 @@ dev = [
     "mypy>=1.0.0",
     "bandit>=1.7.0",
     "types-requests>=2.31.0",
+    "httpx>=0.25.0",  # For testing FastAPI
+    "pytest-asyncio>=0.21.0",  # For async test support
+]
+debug = [
+    "ipython>=8.0.0",
+    "pdbpp>=0.10.3",
 ]
 
 [project.urls]
@@ -82,6 +88,15 @@ warn_no_return = true
 warn_unreachable = true
 strict_equality = false
 ignore_missing_imports = true
+# FastAPI and related imports
+[[tool.mypy.overrides]]
+module = [
+    "fastapi.*",
+    "uvicorn.*",
+    "starlette.*",
+    "pydantic.*",
+]
+ignore_missing_imports = true
 
 [tool.bandit]
 exclude_dirs = ["tests"]
@@ -93,3 +108,4 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short"
+asyncio_mode = "auto"
