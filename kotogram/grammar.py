@@ -154,7 +154,11 @@ class GrammarRule(BaseModel):
         ..., description="List of token patterns to match"
     )
     description: str = Field("", description="Description of the grammar rule")
-    tag: str | None = Field(None, description="Optional tag for the rule")
+    category: str | None = Field(None, description="Optional category for the rule")
+    index: int | None = Field(None, description="Optional index for the rule")
+    examples: list[str] = Field(
+        default_factory=list, description="Example sentences for the rule"
+    )
 
     def model_post_init(self, __context) -> None:
         """Validate patterns after model initialization"""

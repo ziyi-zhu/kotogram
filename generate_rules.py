@@ -5,150 +5,445 @@ import json
 from pathlib import Path
 
 from kotogram.grammar import GrammarRule, RuleRegistry, TokenPattern
-from kotogram.types import PartOfSpeech
+from kotogram.types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
 
 
 def create_default_rules() -> RuleRegistry:
     """Create default grammar rules for Japanese patterns"""
     registry = RuleRegistry()
 
-    patterns_noun_no_aida = [
-        TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-        TokenPattern(value="の"),
-        TokenPattern(value="間"),
-    ]
     registry.add_rule(
         GrammarRule(
-            name="～間",
-            patterns=patterns_noun_no_aida,
-            description="名詞＋の＋間",
-            tag="N3-1",
+            name="～間（に）",
+            patterns=[
+                TokenPattern(
+                    part_of_speech=PartOfSpeech.VERB,
+                    alternatives=[
+                        TokenPattern(
+                            part_of_speech=PartOfSpeech.ADJECTIVE,
+                            infl_type=InflectionType.ADJECTIVE_ISTEM,
+                            alternatives=[
+                                TokenPattern(
+                                    part_of_speech=PartOfSpeech.ADJECTIVE,
+                                    infl_type=InflectionType.ADJECTIVE_AUO,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                TokenPattern(value="間"),
+                TokenPattern(value="に", optional=True),
+            ],
+            description="動詞普通形/い形容詞普通形＋間（に）",
+            category="N3",
+            index=1,
+            examples=[
+                "赤ちゃんが寝ている間に、洗濯をしました。",
+                "日本に留学している間に富士山に登りたい。",
+                "この機械は新しい間、使い方が難しい。",
+            ],
         )
     )
 
-    patterns_verb_basic_maida = [
-        TokenPattern(part_of_speech=PartOfSpeech.VERB),
-        TokenPattern(value="間"),
-        TokenPattern(value="に"),
-    ]
     registry.add_rule(
         GrammarRule(
-            name="～間に",
-            patterns=patterns_verb_basic_maida,
-            description="動詞普通形＋間に",
-            tag="N3-2",
+            name="～間（に）",
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                TokenPattern(value="の"),
+                TokenPattern(value="間"),
+                TokenPattern(value="に", optional=True),
+            ],
+            description="名詞＋の＋間（に）",
+            category="N3",
+            index=1,
+            examples=[
+                "山田先生の講演の間、皆熱心に話を聞いていた。",
+                "私は夏休みの間、ずっと実家にいました。",
+            ],
         )
     )
 
-    patterns_verb_masu_agaru = [
-        TokenPattern(part_of_speech=PartOfSpeech.VERB),
-        TokenPattern(value="あがる"),
-    ]
+    registry.add_rule(
+        GrammarRule(
+            name="～間（に）",
+            patterns=[
+                TokenPattern(
+                    part_of_speech=PartOfSpeech.NOUN,
+                    pos_detail=POSDetailType.NOUN_ADJECTIVE_VERBAL_STEM,
+                    alternatives=[
+                        TokenPattern(
+                            part_of_speech=PartOfSpeech.NOUN,
+                            pos_detail=POSDetailType.NOUN_NAI_ADJECTIVE_STEM,
+                        ),
+                    ],
+                ),
+                TokenPattern(value="な"),
+                TokenPattern(value="間"),
+                TokenPattern(value="に", optional=True),
+            ],
+            description="な形容詞語幹＋な＋間（に）",
+            category="N3",
+            index=1,
+            examples=[
+                "便利な間にやっておきましょう。",
+                "静かな間に勉強を終わらせたい。",
+            ],
+        )
+    )
+
     registry.add_rule(
         GrammarRule(
             name="～あがる",
-            patterns=patterns_verb_masu_agaru,
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                TokenPattern(
+                    value="あがる",
+                    alternatives=[
+                        TokenPattern(value="上がる"),
+                    ],
+                ),
+            ],
             description="動詞「ます形」＋あがる",
-            tag="N3-3",
+            category="N3",
+            index=3,
+            examples=[
+                "最新の企画書が出来あがったので、どうぞご覧ください。",
+                "彼氏へのマフラーが編みあがった。",
+            ],
         )
     )
 
-    patterns_noun_de_aru_ippou = [
-        TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-        TokenPattern(value="で"),
-        TokenPattern(value="ある"),
-        TokenPattern(value="一方"),
-        TokenPattern(value="で", optional=True),
-    ]
+    registry.add_rule(
+        GrammarRule(
+            name="～いい/よい",
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                TokenPattern(
+                    value="いい",
+                    alternatives=[
+                        TokenPattern(value="よい"),
+                    ],
+                ),
+            ],
+            description="動詞「ます形」＋いい/よい",
+            category="N3",
+            index=4,
+            examples=[
+                "この町は住みよいです。",
+                "この薬は飲みいいです。",
+                "この本はわかりよいです。",
+            ],
+        )
+    )
+
     registry.add_rule(
         GrammarRule(
             name="～一方（で）",
-            patterns=patterns_noun_de_aru_ippou,
-            description="名詞＋である＋一方（で）",
-            tag="N3-5",
+            patterns=[
+                TokenPattern(
+                    part_of_speech=PartOfSpeech.VERB,
+                    alternatives=[
+                        TokenPattern(
+                            part_of_speech=PartOfSpeech.ADJECTIVE,
+                            infl_type=InflectionType.ADJECTIVE_ISTEM,
+                            alternatives=[
+                                TokenPattern(
+                                    part_of_speech=PartOfSpeech.ADJECTIVE,
+                                    infl_type=InflectionType.ADJECTIVE_AUO,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                TokenPattern(value="ない", optional=True),
+                TokenPattern(value="一方"),
+                TokenPattern(value="で", optional=True),
+            ],
+            description="動詞普通形/い形容詞辞書形＋一方（で）",
+            category="N3",
+            index=5,
+            examples=[
+                "彼は自分は何もしていない一方で、他人のすることによく文句を言う。",
+                "田中さんは医科大学の教授である一方、小説家としても有名だ。",
+                "娘ならきっと合格できるだろうと信じる一方で、ちょっと不安なところもある。",
+                "この機械は新しい一方で、使い方が難しい。",
+                "収入が減る一方で、教育費などの支出は増えていくのだから、節約するしかない。",
+                "姉は明るい一方で、妹は無口だ。",
+            ],
         )
     )
 
-    patterns_noun_verb_ta_uede = [
-        TokenPattern(part_of_speech=PartOfSpeech.VERB),
-        TokenPattern(value="た"),
-        TokenPattern(value="上"),
-        TokenPattern(value="で"),
-        TokenPattern(value="の", optional=True),
-    ]
+    registry.add_rule(
+        GrammarRule(
+            name="～一方（で）",
+            patterns=[
+                TokenPattern(
+                    part_of_speech=PartOfSpeech.NOUN,
+                    pos_detail=POSDetailType.NOUN_ADJECTIVE_VERBAL_STEM,
+                    alternatives=[
+                        TokenPattern(
+                            part_of_speech=PartOfSpeech.NOUN,
+                            pos_detail=POSDetailType.NOUN_NAI_ADJECTIVE_STEM,
+                        ),
+                    ],
+                ),
+                TokenPattern(
+                    value="な",
+                    alternatives=[
+                        TokenPattern(value="で"),
+                    ],
+                ),
+                TokenPattern(value="ある", optional=True),
+                TokenPattern(value="一方"),
+                TokenPattern(value="で", optional=True),
+            ],
+            description="な形容詞語幹＋な/である＋一方（で）",
+            category="N3",
+            index=5,
+            examples=[
+                "彼は真面目な一方で、冗談もよく言う。",
+                "この部屋は静かな一方で、少し暗いです。",
+                "彼女は有名である一方、謙虚な人です。",
+            ],
+        )
+    )
+
+    registry.add_rule(
+        GrammarRule(
+            name="～一方（で）",
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                TokenPattern(
+                    value="の",
+                    alternatives=[
+                        TokenPattern(value="で"),
+                    ],
+                ),
+                TokenPattern(value="ある", optional=True),
+                TokenPattern(value="一方"),
+                TokenPattern(value="で", optional=True),
+            ],
+            description="名詞＋である＋一方（で）",
+            category="N3",
+            index=5,
+            examples=[
+                "田中さんは医科大学の教授である一方、小説家としても有名だ。",
+                "この制度は学生のための一方、教員にもメリットがある。",
+            ],
+        )
+    )
+
+    registry.add_rule(
+        GrammarRule(
+            name="～一方だ",
+            patterns=[
+                TokenPattern(
+                    part_of_speech=PartOfSpeech.VERB, infl_form=InflectionForm.BASIC
+                ),
+                TokenPattern(value="一方"),
+                TokenPattern(value="だ"),
+            ],
+            description="動詞辞書形＋一方だ",
+            category="N3",
+            index=6,
+            examples=[
+                "ここ数年、この町の人口は減る一方だ。",
+                "わが社の業績はよくなる一方だ。",
+            ],
+        )
+    )
+
     registry.add_rule(
         GrammarRule(
             name="～上で（の）",
-            patterns=patterns_noun_verb_ta_uede,
-            description="名詞＋動詞「た形」＋上で（の）",
-            tag="N3-7",
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                TokenPattern(value="た"),
+                TokenPattern(value="上"),
+                TokenPattern(value="で"),
+                TokenPattern(value="の", optional=True),
+            ],
+            description="動詞「た形」＋上で（の）",
+            category="N3",
+            index=7,
+            examples=[
+                "私が皆様のご意見を伺った上で、来週ご報告いたします。",
+                "それぞれの説明をよく聞いた上で、旅行のコースを選びたいと思います。",
+            ],
         )
     )
 
-    patterns_verb_negative_uchini = [
-        TokenPattern(part_of_speech=PartOfSpeech.VERB),
-        TokenPattern(value="ない"),
-        TokenPattern(value="うち"),
-        TokenPattern(value="に"),
-    ]
+    registry.add_rule(
+        GrammarRule(
+            name="～上に",
+            patterns=[
+                TokenPattern(
+                    part_of_speech=PartOfSpeech.VERB,
+                    alternatives=[
+                        TokenPattern(
+                            part_of_speech=PartOfSpeech.ADJECTIVE,
+                            infl_type=InflectionType.ADJECTIVE_ISTEM,
+                            alternatives=[
+                                TokenPattern(
+                                    part_of_speech=PartOfSpeech.ADJECTIVE,
+                                    infl_type=InflectionType.ADJECTIVE_AUO,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                TokenPattern(value="ない", optional=True),
+                TokenPattern(value="上"),
+                TokenPattern(value="に"),
+            ],
+            description="動詞普通形/い形容詞辞書形＋上に",
+            category="N3",
+            index=9,
+            examples=[
+                "そのスポーツクラブは入会金が要らない上に、わが家から近い。",
+                "台風が近づいてきて、風が強い上に、雨も激しく降っている。",
+            ],
+        )
+    )
+
+    registry.add_rule(
+        GrammarRule(
+            name="～上に",
+            patterns=[
+                TokenPattern(
+                    part_of_speech=PartOfSpeech.NOUN,
+                    pos_detail=POSDetailType.NOUN_ADJECTIVE_VERBAL_STEM,
+                    alternatives=[
+                        TokenPattern(
+                            part_of_speech=PartOfSpeech.NOUN,
+                            pos_detail=POSDetailType.NOUN_NAI_ADJECTIVE_STEM,
+                        ),
+                    ],
+                ),
+                TokenPattern(
+                    value="な",
+                    alternatives=[
+                        TokenPattern(value="で"),
+                    ],
+                ),
+                TokenPattern(value="ある", optional=True),
+                TokenPattern(value="上"),
+                TokenPattern(value="に"),
+            ],
+            description="な形容詞語幹＋な/である＋上に",
+            category="N3",
+            index=9,
+            examples=[
+                "この商品はデザインがユニークな上に、色もカラフルだ。",
+            ],
+        )
+    )
+
+    registry.add_rule(
+        GrammarRule(
+            name="～上に",
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                TokenPattern(
+                    value="の",
+                    alternatives=[
+                        TokenPattern(value="で"),
+                    ],
+                ),
+                TokenPattern(value="ある", optional=True),
+                TokenPattern(value="上"),
+                TokenPattern(value="に"),
+            ],
+            description="名詞＋である/の＋上に",
+            category="N3",
+            index=9,
+            examples=[
+                "彼は学生の上に、アルバイトもしている。",
+            ],
+        )
+    )
+
     registry.add_rule(
         GrammarRule(
             name="～ないうちに",
-            patterns=patterns_verb_negative_uchini,
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                TokenPattern(value="ない"),
+                TokenPattern(value="うち"),
+                TokenPattern(value="に"),
+            ],
             description="動詞「ない形」＋ない＋うちに",
-            tag="N3-10",
+            category="N3",
+            index=10,
+            examples=[
+                "弟と妹がいると集中できないから、今日は二人が帰ってこないうちに、宿題をやってしまう。",
+                "昨日のパーティーは、友だちと話していたら、ほとんど何も食べないうちに終わってしまって、後でおなかがすいてしまった。",
+            ],
         )
     )
 
-    patterns_numeral_okini = [
-        TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-        TokenPattern(value="おき"),
-        TokenPattern(value="に"),
-    ]
     registry.add_rule(
         GrammarRule(
             name="～おきに",
-            patterns=patterns_numeral_okini,
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                TokenPattern(value="おき"),
+                TokenPattern(value="に"),
+            ],
             description="数量詞＋おきに",
-            tag="N3-12",
+            category="N3",
+            index=12,
+            examples=[
+                "この道には5メートルおきに木が植えてある。",
+                "新宿へ向かう電車は3分おきに出ている。",
+            ],
         )
     )
 
-    patterns_noun_kara_noun_nikakete = [
-        TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-        TokenPattern(value="から"),
-        TokenPattern(),  # Multi-wildcard (all fields None)
-        TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-        TokenPattern(value="にかけて"),
-    ]
     registry.add_rule(
         GrammarRule(
             name="～から～にかけて",
-            patterns=patterns_noun_kara_noun_nikakete,
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                TokenPattern(value="から"),
+                TokenPattern(),  # Multi-wildcard (all fields None)
+                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                TokenPattern(value="にかけて"),
+            ],
             description="名詞＋から＋名詞＋にかけて",
-            tag="N3-19",
+            category="N3",
+            index=19,
+            examples=[
+                "あの鳥が日本で見られるのは、11月から3月にかけてです。",
+                "東北地方から北海道にかけて今夜は大雪になるでしょう。",
+            ],
         )
     )
 
-    patterns_gurai_wa_nai = [
-        TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-        TokenPattern(
-            alternatives=[
-                TokenPattern(value="ぐらい"),
-                TokenPattern(value="くらい"),
-            ]
-        ),
-        TokenPattern(),  # Multi-wildcard (all fields None)
-        TokenPattern(value="は"),
-        TokenPattern(value="い", optional=True),
-        TokenPattern(value="ない"),
-    ]
     registry.add_rule(
         GrammarRule(
             name="～くらい／ぐらい",
-            patterns=patterns_gurai_wa_nai,
+            patterns=[
+                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                TokenPattern(
+                    value="ぐらい",
+                    alternatives=[
+                        TokenPattern(value="くらい"),
+                    ],
+                ),
+                TokenPattern(),  # Multi-wildcard (all fields None)
+                TokenPattern(value="は"),
+                TokenPattern(value="い", optional=True),
+                TokenPattern(value="ない"),
+            ],
             description="～ぐらい～はない",
-            tag="N3-23",
+            category="N3",
+            index=23,
+            examples=[
+                "戦争ぐらい残酷なものはない。",
+                "彼くらい努力する人はいない。",
+            ],
         )
     )
 

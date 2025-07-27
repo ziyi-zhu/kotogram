@@ -61,6 +61,7 @@ class POSDetailType(Enum):
     PARTICLE_ADVERBIAL = "副助詞"
     PARTICLE_INTERJECTIONAL = "間投助詞"
     PARTICLE_MULTIPLE = "副助詞／並立助詞／終助詞"
+    PARTICLE_CONNECTIVE = "助詞類接続"
 
     # Symbol-related
     SYMBOL_PERIOD = "句点"
@@ -80,7 +81,8 @@ class InflectionForm(Enum):
     BASIC = "基本形"
     STEM = "語幹"
     INFLECTED = "連用形"
-    INFLECTED_TE = "連用タ接続"
+    INFLECTED_TE = "連用テ接続"
+    INFLECTED_TA = "連用タ接続"
     INFLECTED_GO = "連用ゴザイ"
     IMPERATIVE = "命令ｉ"
     IMPERATIVE_E = "命令ｅ"
@@ -108,6 +110,7 @@ class InflectionType(Enum):
     GODAN_GA = "五段・ガ行"
     GODAN_BA = "五段・バ行"
     GODAN_SA = "五段・サ行"
+    GODAN_TA = "五段・タ行"
     ICHIDAN = "一段"
     SAHEN = "サ変・スル"
     KA_GODAN = "カ変・クル"
@@ -116,6 +119,7 @@ class InflectionType(Enum):
     SA_GODAN_SPECIAL = "サ変・−ズル"
     ADJECTIVE_ISTEM = "形容詞・イ段"
     ADJECTIVE_AUO = "形容詞・アウオ段"
+    ADJECTIVE_II = "形容詞・イイ"
     UNCHANGING = "不変化型"
 
     SPECIAL_TA = "特殊・タ"
