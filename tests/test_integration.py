@@ -28,7 +28,7 @@ class TestIntegration:
             for example in rule.examples:
                 print(f"  Testing example: {example}")
                 tokens = self.analyzer.parse_text(example)
-                matches = self.registry.match_all(tokens)
+                matches = self.registry.find_all_matches(tokens)
 
                 # Check if the rule is found in matches
                 found_rules = [m.rule_name for m in matches]

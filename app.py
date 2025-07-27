@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from kotogram.analyzer import KotogramAnalyzer
-from kotogram.grammar import MatchResult, RuleRegistry
+from kotogram.grammar import GrammarMatchResult, RuleRegistry
 from kotogram.token import KotogramToken
 
 # Initialize FastAPI app
@@ -53,7 +53,7 @@ class MatchRequest(BaseModel):
 
 class MatchResponse(BaseModel):
     tokens: list[KotogramToken]
-    matches: list[MatchResult]
+    matches: list[GrammarMatchResult]
 
 
 class ParseAndMatchRequest(BaseModel):
@@ -63,7 +63,7 @@ class ParseAndMatchRequest(BaseModel):
 class ParseAndMatchResponse(BaseModel):
     text: str
     tokens: list[KotogramToken]
-    matches: list[MatchResult]
+    matches: list[GrammarMatchResult]
 
 
 class HealthResponse(BaseModel):
@@ -96,7 +96,7 @@ async def match_grammar(request: MatchRequest):
             raise HTTPException(status_code=400, detail="Tokens list cannot be empty")
 
         # Match against grammar rules
-        matches = rule_registry.match_all(request.tokens)
+        matches = rule_registry.find_all_matches(request.tokens)
 
         return MatchResponse(tokens=request.tokens, matches=matches)
 
@@ -115,7 +115,7 @@ async def parse_and_match(request: ParseAndMatchRequest):
         tokens = analyzer.parse_text(request.text)
 
         # Match against grammar rules
-        matches = rule_registry.match_all(tokens)
+        matches = rule_registry.find_all_matches(tokens)
 
         return ParseAndMatchResponse(text=request.text, tokens=tokens, matches=matches)
 
