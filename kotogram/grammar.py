@@ -10,7 +10,7 @@ from .types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
 
 
 class TokenPattern(BaseModel):
-    """Pattern for matching individual tokens using Pydantic"""
+    """Pattern for matching individual tokens"""
 
     # Value that matches either surface form or base form
     value: str | None = Field(
@@ -147,7 +147,7 @@ class MatchResult(BaseModel):
 
 
 class GrammarRule(BaseModel):
-    """Grammar rule with pattern sequence using Pydantic"""
+    """Grammar rule with pattern sequence"""
 
     name: str = Field(..., description="Name of the grammar rule")
     patterns: list[TokenPattern] = Field(
@@ -321,7 +321,7 @@ class RuleRegistry:
                 with open(rule_file, "r", encoding="utf-8") as f:
                     rule_data = json.load(f)
 
-                # Create rule directly from JSON data using Pydantic
+                # Create rule directly from JSON data
                 rule = GrammarRule(**rule_data)
                 self.add_rule(rule)
 

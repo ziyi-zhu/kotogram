@@ -2,6 +2,7 @@
 
 from .analyzer import KotogramAnalyzer
 from .grammar import GrammarRule, MatchResult, RuleRegistry, TokenPattern
+from .patterns import CommonPatterns
 from .token import KotogramToken
 from .types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
 
@@ -17,4 +18,5 @@ __all__ = [
     "GrammarRule",
     "RuleRegistry",
     "MatchResult",
+    "CommonPatterns",
 ]

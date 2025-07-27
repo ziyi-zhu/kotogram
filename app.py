@@ -68,14 +68,8 @@ class ParseAndMatchResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
-    analyzer: str
     rules_loaded: int
     available_rules: list[str]
-
-
-class ErrorResponse(BaseModel):
-    error: str
-    message: str
 
 
 @app.post("/parse", response_model=ParseResponse)
@@ -134,7 +128,6 @@ async def health_check():
     """Health check endpoint"""
     return HealthResponse(
         status="healthy",
-        analyzer="ready",
         rules_loaded=len(rule_registry.rules),
         available_rules=rule_registry.get_rule_names(),
     )

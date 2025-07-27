@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 
 from kotogram.grammar import GrammarRule, RuleRegistry, TokenPattern
-from kotogram.types import InflectionForm, InflectionType, PartOfSpeech, POSDetailType
+from kotogram.patterns import CommonPatterns
+from kotogram.types import PartOfSpeech
 
 
 def create_default_rules() -> RuleRegistry:
@@ -16,21 +17,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～間（に）",
             patterns=[
-                TokenPattern(
-                    part_of_speech=PartOfSpeech.VERB,
-                    alternatives=[
-                        TokenPattern(
-                            part_of_speech=PartOfSpeech.ADJECTIVE,
-                            infl_type=InflectionType.ADJECTIVE_ISTEM,
-                            alternatives=[
-                                TokenPattern(
-                                    part_of_speech=PartOfSpeech.ADJECTIVE,
-                                    infl_type=InflectionType.ADJECTIVE_AUO,
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
+                *CommonPatterns.VERB_OR_I_ADJ_PLAIN,
                 TokenPattern(value="間"),
                 TokenPattern(value="に", optional=True),
             ],
@@ -49,8 +36,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～間（に）",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-                TokenPattern(value="の"),
+                *CommonPatterns.NOUN_NO,
                 TokenPattern(value="間"),
                 TokenPattern(value="に", optional=True),
             ],
@@ -68,17 +54,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～間（に）",
             patterns=[
-                TokenPattern(
-                    part_of_speech=PartOfSpeech.NOUN,
-                    pos_detail=POSDetailType.NOUN_ADJECTIVE_VERBAL_STEM,
-                    alternatives=[
-                        TokenPattern(
-                            part_of_speech=PartOfSpeech.NOUN,
-                            pos_detail=POSDetailType.NOUN_NAI_ADJECTIVE_STEM,
-                        ),
-                    ],
-                ),
-                TokenPattern(value="な"),
+                *CommonPatterns.NA_ADJ_STEM_NA,
                 TokenPattern(value="間"),
                 TokenPattern(value="に", optional=True),
             ],
@@ -96,7 +72,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～あがる",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                *CommonPatterns.VERB_MASU,
                 TokenPattern(
                     value="あがる",
                     alternatives=[
@@ -118,7 +94,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～いい/よい",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.VERB),
+                *CommonPatterns.VERB_MASU,
                 TokenPattern(
                     value="いい",
                     alternatives=[
@@ -141,22 +117,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～一方（で）",
             patterns=[
-                TokenPattern(
-                    part_of_speech=PartOfSpeech.VERB,
-                    alternatives=[
-                        TokenPattern(
-                            part_of_speech=PartOfSpeech.ADJECTIVE,
-                            infl_type=InflectionType.ADJECTIVE_ISTEM,
-                            alternatives=[
-                                TokenPattern(
-                                    part_of_speech=PartOfSpeech.ADJECTIVE,
-                                    infl_type=InflectionType.ADJECTIVE_AUO,
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
-                TokenPattern(value="ない", optional=True),
+                *CommonPatterns.VERB_OR_I_ADJ_PLAIN,
                 TokenPattern(value="一方"),
                 TokenPattern(value="で", optional=True),
             ],
@@ -178,23 +139,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～一方（で）",
             patterns=[
-                TokenPattern(
-                    part_of_speech=PartOfSpeech.NOUN,
-                    pos_detail=POSDetailType.NOUN_ADJECTIVE_VERBAL_STEM,
-                    alternatives=[
-                        TokenPattern(
-                            part_of_speech=PartOfSpeech.NOUN,
-                            pos_detail=POSDetailType.NOUN_NAI_ADJECTIVE_STEM,
-                        ),
-                    ],
-                ),
-                TokenPattern(
-                    value="な",
-                    alternatives=[
-                        TokenPattern(value="で"),
-                    ],
-                ),
-                TokenPattern(value="ある", optional=True),
+                *CommonPatterns.NA_ADJ_STEM_NA_OR_DEARU,
                 TokenPattern(value="一方"),
                 TokenPattern(value="で", optional=True),
             ],
@@ -213,14 +158,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～一方（で）",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-                TokenPattern(
-                    value="の",
-                    alternatives=[
-                        TokenPattern(value="で"),
-                    ],
-                ),
-                TokenPattern(value="ある", optional=True),
+                *CommonPatterns.NOUN_NO_OR_DEARU,
                 TokenPattern(value="一方"),
                 TokenPattern(value="で", optional=True),
             ],
@@ -238,9 +176,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～一方だ",
             patterns=[
-                TokenPattern(
-                    part_of_speech=PartOfSpeech.VERB, infl_form=InflectionForm.BASIC
-                ),
+                *CommonPatterns.VERB_BASIC,
                 TokenPattern(value="一方"),
                 TokenPattern(value="だ"),
             ],
@@ -258,8 +194,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～上で（の）",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.VERB),
-                TokenPattern(value="た"),
+                *CommonPatterns.VERB_TA,
                 TokenPattern(value="上"),
                 TokenPattern(value="で"),
                 TokenPattern(value="の", optional=True),
@@ -278,22 +213,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～上に",
             patterns=[
-                TokenPattern(
-                    part_of_speech=PartOfSpeech.VERB,
-                    alternatives=[
-                        TokenPattern(
-                            part_of_speech=PartOfSpeech.ADJECTIVE,
-                            infl_type=InflectionType.ADJECTIVE_ISTEM,
-                            alternatives=[
-                                TokenPattern(
-                                    part_of_speech=PartOfSpeech.ADJECTIVE,
-                                    infl_type=InflectionType.ADJECTIVE_AUO,
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
-                TokenPattern(value="ない", optional=True),
+                *CommonPatterns.VERB_OR_I_ADJ_PLAIN,
                 TokenPattern(value="上"),
                 TokenPattern(value="に"),
             ],
@@ -311,23 +231,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～上に",
             patterns=[
-                TokenPattern(
-                    part_of_speech=PartOfSpeech.NOUN,
-                    pos_detail=POSDetailType.NOUN_ADJECTIVE_VERBAL_STEM,
-                    alternatives=[
-                        TokenPattern(
-                            part_of_speech=PartOfSpeech.NOUN,
-                            pos_detail=POSDetailType.NOUN_NAI_ADJECTIVE_STEM,
-                        ),
-                    ],
-                ),
-                TokenPattern(
-                    value="な",
-                    alternatives=[
-                        TokenPattern(value="で"),
-                    ],
-                ),
-                TokenPattern(value="ある", optional=True),
+                *CommonPatterns.NA_ADJ_STEM_NA_OR_DEARU,
                 TokenPattern(value="上"),
                 TokenPattern(value="に"),
             ],
@@ -344,14 +248,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～上に",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
-                TokenPattern(
-                    value="の",
-                    alternatives=[
-                        TokenPattern(value="で"),
-                    ],
-                ),
-                TokenPattern(value="ある", optional=True),
+                *CommonPatterns.NOUN_NO_OR_DEARU,
                 TokenPattern(value="上"),
                 TokenPattern(value="に"),
             ],
@@ -368,8 +265,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～ないうちに",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.VERB),
-                TokenPattern(value="ない"),
+                *CommonPatterns.VERB_NAI,
                 TokenPattern(value="うち"),
                 TokenPattern(value="に"),
             ],
@@ -387,7 +283,7 @@ def create_default_rules() -> RuleRegistry:
         GrammarRule(
             name="～おきに",
             patterns=[
-                TokenPattern(part_of_speech=PartOfSpeech.NOUN),
+                *CommonPatterns.QUANTIFIER,
                 TokenPattern(value="おき"),
                 TokenPattern(value="に"),
             ],
@@ -407,7 +303,7 @@ def create_default_rules() -> RuleRegistry:
             patterns=[
                 TokenPattern(part_of_speech=PartOfSpeech.NOUN),
                 TokenPattern(value="から"),
-                TokenPattern(),  # Multi-wildcard (all fields None)
+                TokenPattern(),
                 TokenPattern(part_of_speech=PartOfSpeech.NOUN),
                 TokenPattern(value="にかけて"),
             ],
@@ -432,7 +328,7 @@ def create_default_rules() -> RuleRegistry:
                         TokenPattern(value="くらい"),
                     ],
                 ),
-                TokenPattern(),  # Multi-wildcard (all fields None)
+                TokenPattern(),
                 TokenPattern(value="は"),
                 TokenPattern(value="い", optional=True),
                 TokenPattern(value="ない"),
