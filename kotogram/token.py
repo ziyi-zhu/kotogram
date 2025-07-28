@@ -83,9 +83,6 @@ class KotogramToken(BaseModel):
 
         # Build the string
         result = f"{self.surface}{base_part}【{self.part_of_speech.value}】"
-        if not self.is_symbol:
-            result += f"「{self.reading}・{self.phonetic}」"
         if details:
             result += "・".join(details)
-
         return result

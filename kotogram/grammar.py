@@ -310,11 +310,20 @@ class GrammarRule(BaseModel):
             pattern_matches = pattern.find_all_matches(tokens)
             all_matches.extend(pattern_matches)
 
+        # Remove duplicate matches with same start and end positions
+        unique_matches = []
+        seen_positions = set()
+        for match in all_matches:
+            position_key = (match.start_pos, match.end_pos)
+            if position_key not in seen_positions:
+                seen_positions.add(position_key)
+                unique_matches.append(match)
+
         # Sort by start position
-        all_matches.sort(key=lambda x: x.start_pos)
+        unique_matches.sort(key=lambda x: x.start_pos)
         return GrammarMatchResult(
             rule=self,
-            pattern_matches=all_matches,
+            pattern_matches=unique_matches,
         )
 
 
