@@ -44,7 +44,9 @@ class POSDetailType(Enum):
     NOUN_ADVERBIALIZATION = "副詞化"
     NOUN_CONNECTION = "名詞接続"
     NOUN_ADJECTIVE_VERBAL_STEM = "形容動詞語幹"
+    NOUN_AUXILIARY_VERB_STEM = "助動詞語幹"
     NOUN_NAI_ADJECTIVE_STEM = "ナイ形容詞語幹"
+    NOUN_NAME = "名"
 
     # Verb-related
     VERB_INDEPENDENT = "自立"
@@ -68,6 +70,8 @@ class POSDetailType(Enum):
     SYMBOL_COMMA = "読点"
     SYMBOL_GENERAL = "一般"
     SYMBOL_ALPHABET = "アルファベット"
+    SYMBOL_PARENTHESIS_OPEN = "括弧開"
+    SYMBOL_PARENTHESIS_CLOSE = "括弧閉"
 
     # Others
     COMPOUND = "連語"
@@ -84,6 +88,8 @@ class InflectionForm(Enum):
     INFLECTED_TE = "連用テ接続"
     INFLECTED_TA = "連用タ接続"
     INFLECTED_GO = "連用ゴザイ"
+    INFLECTED_NI = "連用ニ接続"
+    INFLECTED_GARU = "ガル接続"
     IMPERATIVE = "命令ｉ"
     IMPERATIVE_E = "命令ｅ"
     IMPERATIVE_YO = "命令ｙｏ"
@@ -92,6 +98,7 @@ class InflectionForm(Enum):
     ATTRIBUTIVE = "連体形"
     UNINFLECTED = "未然形"
     UNINFLECTED_NEGATIVE = "未然ウ接続"
+    UNINFLECTED_NU = "未然ヌ接続"
     UNINFLECTED_SPECIAL = "未然特殊"
     NOUN_CONNECTION = "体言接続"
     UNKNOWN = "*"
@@ -112,6 +119,7 @@ class InflectionType(Enum):
     GODAN_SA = "五段・サ行"
     GODAN_TA = "五段・タ行"
     ICHIDAN = "一段"
+    ICHIDAN_KURERU = "一段・クレル"
     SAHEN = "サ変・スル"
     KA_GODAN = "カ変・クル"
     KA_GODAN_SPECIAL = "カ変・来ル"
@@ -135,4 +143,5 @@ class InflectionType(Enum):
     SPECIAL_RERU = "特殊・レル"
     SPECIAL_RU = "特殊・ル"
     SPECIAL_U = "特殊・ウ"
+    SPECIAL_NU = "特殊・ヌ"
     UNKNOWN = "*"

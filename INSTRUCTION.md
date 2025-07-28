@@ -5,7 +5,7 @@ You will be implementing Japanese grammar rules by analyzing images that contain
 ### 1. Image Analysis
 - Carefully examine the provided image(s) for grammar rule information
 - Extract the following for each rule:
-  - **Category** (e.g., N3, N2, N1)
+  - **Category** (N3)
   - **Index** (numerical identifier)
   - **Rule name** (the grammar pattern name, usually in Japanese)
   - **Pattern description** (how the grammar is formed)
@@ -39,7 +39,7 @@ def create_rule() -> GrammarRule:
                 ]
             ),
         ],
-        description="[Pattern description from image]",
+        description="[Pattern description from image. Include ALL patterns for this rule, separated by \\n]",
         category="[Category from image]",
         index=[Index from image],
         examples=[
@@ -53,12 +53,84 @@ def create_rule() -> GrammarRule:
 
 ### 4. Pattern Design Guidelines
 
+#### Before Starting
+- Look at 5 example rules in the `rule_definitions/` directory and patterns in `kotogram/patterns.py` to understand the established patterns and conventions
+
+#### ⚠️ CRITICAL: Avoid Overly Broad Patterns
+**NEVER create patterns that are too general and could match everything.** This is a common mistake that leads to false positives.
+
+**❌ WRONG - These patterns are too broad:**
+```python
+TokenPattern(
+    part_of_speech=PartOfSpeech.VERB,
+    infl_form=InflectionForm.INFLECTED,
+)
+TokenPattern(
+    part_of_speech=PartOfSpeech.VERB,
+    infl_form=InflectionForm.BASIC,
+)
+TokenPattern(part_of_speech=PartOfSpeech.NOUN)
+```
+
+**Key Principle:** Patterns should be specific enough to only match the actual grammar forms you're trying to identify, not every possible instance of that part of speech or inflection form.
+
+#### Rule Combination Guidelines
+When a grammar rule has multiple meanings or usage patterns (e.g., hearsay vs. appearance for ~そうだ), combine them into a single comprehensive rule:
+- **Combine all patterns** from different meanings into one rule
+- **List all patterns** in the description field without differentiating meanings
+- **Include all examples** from all meanings in the examples list
+- **No need to mention or differentiate** different meanings in the description or code comments
+- **Use a single file** with all patterns rather than creating separate rules
+
+Example: For ~そうだ which has both hearsay (伝聞) and appearance (様態) meanings, combine all patterns into one rule with all examples.
+
 #### Use CommonPatterns When Available
-- `CommonPatterns.VERB_MASU` for 動詞「ます形」
-- `CommonPatterns.I_ADJECTIVE_PLAIN` for い形容詞普通形
-- `CommonPatterns.NA_ADJECTIVE_STEM_NA` for な形容詞語幹＋な
-- `CommonPatterns.NOUN_WO` for 名詞＋を
-- Check existing CommonPatterns before creating new patterns
+Available CommonPatterns for reference:
+
+**Verb Patterns:**
+- `CommonPatterns.VERB_MASU` - 動詞「ます形」
+- `CommonPatterns.VERB_BASIC` - 動詞辞書形
+- `CommonPatterns.VERB_TA` - 動詞 + た
+- `CommonPatterns.VERB_NAI` - 動詞 + ない
+- `CommonPatterns.VERB_OR_I_ADJ_PLAIN` - 動詞普通形/い形容詞普通形
+
+**Adjective Patterns:**
+- `CommonPatterns.NA_ADJ_STEM_NA` - な形容詞語幹 + な
+- `CommonPatterns.NA_ADJ_STEM_NA_OR_DEARU` - な形容詞語幹 + な/である
+
+**Noun Patterns:**
+- `CommonPatterns.NOUN_NO` - 名詞 + の
+- `CommonPatterns.NOUN_NO_OR_DEARU` - 名詞 + の/である
+- `CommonPatterns.QUANTIFIER` - 数量詞
+
+**Description Format:**
+Always include ALL patterns for the rule in the description field, separated by `\n`. For example:
+```
+description="動詞普通形/い形容詞普通形＋間（に）\nな形容詞語幹＋な＋間（に）\n名詞＋の＋間（に）"
+```
+
+Check existing CommonPatterns before creating new patterns. Add new pattern if it does not exist.
+
+#### Pattern Matching Guidelines
+
+**TokenPattern Usage:**
+When a `value` is specified for a TokenPattern, no need to add other information like `part_of_speech` or `pos_detail`. The value alone is sufficient for matching.
+
+**For Explicit Patterns:**
+When you see patterns like `～から～にかけて`, use:
+```python
+TokenPattern(value="から"),
+TokenPattern(),  # Multi wildcard that matches any number of any token
+TokenPattern(value="にかけて"),
+```
+
+**For Specific Forms:**
+- For 動詞辞書形: Use `TokenPattern(part_of_speech=PartOfSpeech.VERB, infl_form=InflectionForm.BASIC)` or directly use `CommonPatterns.VERB_BASIC`
+- For other specific forms, use the appropriate CommonPatterns or create specific TokenPatterns with the correct parameters
+
+**For Optional Elements:**
+- Use `optional=True` for things in parentheses like `(で)`
+- Example: `TokenPattern(value="で", optional=True)`
 
 #### Create New CommonPatterns When Needed
 If a pattern appears commonly across rules but doesn't exist in CommonPatterns:

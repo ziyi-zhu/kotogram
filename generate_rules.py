@@ -19,7 +19,9 @@ def load_rules_from_files() -> RuleRegistry:
     # Get all modules in the rule_definitions package
     rule_modules = []
     for _, module_name, is_pkg in pkgutil.iter_modules(rule_definitions.__path__):
-        if not is_pkg and module_name.startswith("n3_"):
+        if not is_pkg and (
+            module_name.startswith("n3_") or module_name.startswith("n4_")
+        ):
             rule_modules.append(module_name)
 
     # Sort modules to ensure consistent loading order
