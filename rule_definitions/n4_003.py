@@ -45,8 +45,8 @@ def create_rule() -> GrammarRule:
             ),
         ],
         description="い形容詞語幹/な形容詞語幹＋がる",
-        category="N3",
-        index=26,
+        category="N4",
+        index=3,
         examples=[
             "急に大きな音がしたので、その子どもは怖がって泣いてしまった。",
             "猫を可愛がる女の子が多いです。",

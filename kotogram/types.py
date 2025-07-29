@@ -18,6 +18,7 @@ class PartOfSpeech(Enum):
     CONJUNCTION = "接続詞"
     INTERJECTION = "感動詞"
     ADNOMINAL = "連体詞"
+    FILLER = "フィラー"
     UNKNOWN = "未知語"
 
 
@@ -100,6 +101,7 @@ class InflectionForm(Enum):
     UNINFLECTED_NEGATIVE = "未然ウ接続"
     UNINFLECTED_NU = "未然ヌ接続"
     UNINFLECTED_SPECIAL = "未然特殊"
+    UNINFLECTED_RERU = "未然レル接続"
     NOUN_CONNECTION = "体言接続"
     UNKNOWN = "*"
 
@@ -144,4 +146,5 @@ class InflectionType(Enum):
     SPECIAL_RU = "特殊・ル"
     SPECIAL_U = "特殊・ウ"
     SPECIAL_NU = "特殊・ヌ"
+    CLASSICAL_BESHI = "文語・ベシ"
     UNKNOWN = "*"
